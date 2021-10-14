@@ -20,9 +20,11 @@ Pins should be connected as follows (Only required are uncommented in examples):
 | d8   | D2       | NO       |
 | d9   | D3       | NO       |
 
-These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.
+These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.  
 
 ## Autoscroll
+
+`cargo run --example autoscroll`  
 
 Demos the autoscroll feature of HD44780 two-line lcd screens. Autoscroll "scrolls" the display as each character
 is written, effectively pushing the displayed message out to the left as it is printed. The cursor doesn't move.
@@ -31,11 +33,15 @@ is written, effectively pushing the displayed message out to the left as it is p
 
 ## Blink
 
+`cargo run --example blink`  
+
 Blinks the backround of the cursor.
 
 ![Blink Example Gif](../media/blink_example.gif)
 
 ## Character
+
+`cargo run --example character`  
 
 Creates a custom character mapping in the CGRAM on the LCD and displays it (a sideways smiley face)
 
@@ -43,11 +49,15 @@ Creates a custom character mapping in the CGRAM on the LCD and displays it (a si
 
 ## Cursor
 
+`cargo run --example cursor`  
+
 Blinks the cursor on and off.
 
 ![Cursor Example Gif](../media/cursor_example.gif)
 
 ## Display
+
+`cargo run --example display`  
 
 Blinks the display on and off.
 
@@ -55,12 +65,16 @@ Blinks the display on and off.
 
 ## Layout
 
+`cargo run --example layout`  
+
 Demos the text layout direction setting. Left-to-right is the standard layout direction for english, right-to-left
 prints characters in reverse order and direction.
 
 ![Layout Example Gif](../media/layout_example.gif)
 
 ## Scroll
+
+`cargo run --example scroll`  
 
 Scrolls the display left and right, given a direction and the number of positions to scroll by.
 
