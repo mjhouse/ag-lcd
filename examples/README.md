@@ -1,6 +1,6 @@
 # AG-LCD Examples
 
-All examples assume an HD44780 two-line lcd screen connected to an Arduino Nano with the RW pin of the screen connected to 
+All examples assume an HD44780 two-line LCD screen connected to an Arduino Nano with the RW pin of the screen connected to 
 ground, using a four-pin configuration (rather than eight). If you are using an eight pin configuration or have the RW pin
 connected, you may need to uncomment lines or otherwise modify these examples to get them to work.
 
@@ -22,16 +22,16 @@ Pins should be connected as follows (Only required are uncommented in examples):
 
 These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.  
 
-## Autoscroll
+## Autoscroll ([code](autoscroll.rs))
 
 `cargo run --example autoscroll`  
 
-Demos the autoscroll feature of HD44780 two-line lcd screens. Autoscroll "scrolls" the display as each character
-is written, effectively pushing the displayed message out to the left as it is printed. The cursor doesn't move.
+Autoscroll "scrolls" the display as each character is written, effectively pushing the displayed 
+message out to the left as it is printed so that the cursor doesn't move.
 
 ![Autoscroll Example Gif](../media/autoscroll_example.gif)
 
-## Blink
+## Blink ([code](blink.rs))
 
 `cargo run --example blink`  
 
@@ -39,7 +39,7 @@ Blinks the backround of the cursor.
 
 ![Blink Example Gif](../media/blink_example.gif)
 
-## Character
+## Character ([code](character.rs))
 
 `cargo run --example character`  
 
@@ -47,7 +47,7 @@ Creates a custom character mapping in the CGRAM on the LCD and displays it (a si
 
 ![Character Example Gif](../media/character_example.gif)
 
-## Cursor
+## Cursor ([code](cursor.rs))
 
 `cargo run --example cursor`  
 
@@ -55,7 +55,7 @@ Blinks the cursor on and off.
 
 ![Cursor Example Gif](../media/cursor_example.gif)
 
-## Display
+## Display ([code](display.rs))
 
 `cargo run --example display`  
 
@@ -63,7 +63,7 @@ Blinks the display on and off.
 
 ![Display Example Gif](../media/display_example.gif)
 
-## Layout
+## Layout ([code](layout.rs))
 
 `cargo run --example layout`  
 
@@ -72,7 +72,7 @@ prints characters in reverse order and direction.
 
 ![Layout Example Gif](../media/layout_example.gif)
 
-## Scroll
+## Scroll ([code](scroll.rs))
 
 `cargo run --example scroll`  
 
