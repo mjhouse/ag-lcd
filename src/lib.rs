@@ -1,4 +1,7 @@
 #![no_std]
+#![feature(external_doc)]
+
+#![doc(include = "../README.md")]
 
 use arduino_hal::hal::port::{
     mode::{Input, InputMode, Output},
