@@ -13,6 +13,10 @@ fn main() -> ! {
     let d3 = pins.d3;
     let d4 = pins.d4;
     let d5 = pins.d5;
+    // let d6 = pins.d6;
+    // let d7 = pins.d7;
+    // let d8 = pins.d8;
+    // let d9 = pins.d9;
 
     // let d10 = pins.d10;
     let d11 = pins.d11;
