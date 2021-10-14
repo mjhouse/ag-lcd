@@ -1,7 +1,56 @@
 #![no_std]
-#![feature(external_doc)]
-
-#![doc(include = "../README.md")]
+//! # AG-LCD
+//!
+//! This is a rust port of the [LiquidCrystal](https://github.com/arduino-libraries/LiquidCrystal) library. LiquidCrystal 
+//! is a standard C++ library that allows developers to control a HITACHI HD44780 LCD screen with one or two 16-character 
+//! lines. Alternatives to this library (that I've investigated) are:
+//!
+//! * [lcd](https://crates.io/crates/lcd)
+//! * [lcd1602](https://crates.io/crates/lcd1602-rs)
+//!
+//! I decided to create a more comprehensive solution because existing libraries were either incomplete or somewhat
+//! complicated to use. This library relies on [avr-hal](https://github.com/Rahix/avr-hal) as a dependency and expects 
+//! that downstream projects will also be using avr-hal.
+//!  
+//! Most features (blink, cursor, text direction etc.) can be set either through a general `set_` function that accepts
+//! one or two arguments (like [set_blink][LcdDisplay::set_blink]), through specific conveniance functions ([blink_on][LcdDisplay::blink_on] rather
+//! than [set_blink][LcdDisplay::set_blink]) or with a builder function (like [with_blink][LcdDisplay::with_blink]).
+//! 
+//! If some functions are missing for a settings, its either because it doesn't make sense for that particular setting, or 
+//! because that feature can only be set *before* the [build][LcdDisplay::build] method is called (in this case only a `with_`
+//! function is provided).
+//!
+//! ## Usage
+//!
+//! ```
+//! use ag_lcd::{Display, Blink, Cursor, LcdDisplay};
+//!
+//! let peripherals = arduino_hal::Peripherals::take().unwrap();
+//! let pins = arduino_hal::pins!(peripherals);
+//!
+//! let d12 = pins.d12;
+//! let d11 = pins.d11;
+//! let d10 = pins.d10;
+//!
+//! let d2 = pins.d2;
+//! let d3 = pins.d3;
+//! let d4 = pins.d4;
+//! let d5 = pins.d5;
+//!
+//! let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
+//!     .with_half_bus(d2, d3, d4, d5)
+//!     .with_display(Display::On)
+//!     .with_blink(Blink::On)
+//!     .with_cursor(Cursor::On)
+//!     .with_rw(d10)
+//!     .build();
+//!
+//! lcd.set_cursor(Cursor::Off);
+//! lcd.set_blink(Blink::Off);
+//!
+//! lcd.print("Test message!");
+//! ```
+//!
 
 use arduino_hal::hal::port::{
     mode::{Input, InputMode, Output},
