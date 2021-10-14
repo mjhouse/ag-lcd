@@ -2,8 +2,8 @@
 //! # AG-LCD
 //!
 //! This is a rust port of the [LiquidCrystal](https://github.com/arduino-libraries/LiquidCrystal) library. LiquidCrystal 
-//! is a standard C++ library that allows developers to control a HITACHI HD44780 LCD screen with one or two 16-character 
-//! lines. Alternatives to this library (that I've investigated) are:
+//! is a standard C++ library that allows developers to control a [HITACHI HD44780](https://pdf1.alldatasheet.com/datasheet-pdf/view/63673/HITACHI/HD44780/+435JWUEGSzDpKdlpzC.hv+/datasheet.pdf) 
+//! LCD screen with one or two 16-character lines. Alternatives to this library (that I've investigated) are:
 //!
 //! * [lcd](https://crates.io/crates/lcd)
 //! * [lcd1602](https://crates.io/crates/lcd1602-rs)
@@ -37,6 +37,8 @@
 //! let d4 = pins.d4;
 //! let d5 = pins.d5;
 //!
+//! // must provide type for the variable so that rustc
+//! // can deduce default type values for pins.
 //! let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
 //!     .with_half_bus(d2, d3, d4, d5)
 //!     .with_display(Display::On)
