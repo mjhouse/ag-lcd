@@ -9,19 +9,12 @@ Pins should be connected as follows:
 | Nano | LCD      |
 |------|----------|
 | d12  | RS       |
-|------|----------|
 | d11  | E/Enable |
-|------|----------|
 | d10  | RW       |
-|------|----------|
 | d2   | D4       |
-|------|----------|
 | d3   | D5       |
-|------|----------|
 | d4   | D6       |
-|------|----------|
 | d5   | D7       |
-|------|----------|
 
 These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.
 
@@ -30,16 +23,22 @@ These examples require [ravedude](https://crates.io/crates/ravedude) to be insta
 Demos the autoscroll feature of HD44780 two-line lcd screens. Autoscroll "scrolls" the display as each character
 is written, effectively pushing the displayed message out to the left as it is printed. The cursor doesn't move.
 
-![Autoscroll Example Gif](../media/autoscroll.gif)
+![Autoscroll Example Gif](media/autoscroll.gif)
 
 ## Blink
 
-Blinks the cursor on and off.
+Blinks the backround of the cursor.
 
-![Blink Example Gif](../media/blink.gif)
+![Blink Example Gif](media/blink.gif)
 
 ## Character
 
 Creates a custom character mapping in the CGRAM on the LCD and displays it (a sideways smiley face)
 
-![Blink Example Gif](../media/blink.gif)
+![Character Example Gif](media/character.gif)
+
+## Cursor
+
+Blinks the cursor on and off.
+
+![Character Example Gif](media/character.gif)
