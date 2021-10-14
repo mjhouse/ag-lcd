@@ -15,14 +15,6 @@ LCD screen with one or two 16-character lines. Alternatives to this library (tha
 I decided to create a more comprehensive solution because existing libraries were either incomplete or somewhat
 complicated to use. This library relies on [avr-hal](https://github.com/Rahix/avr-hal) as a dependency and expects 
 that downstream projects will also be using avr-hal.
-  
-Most features (blink, cursor, text direction etc.) can be set either through a general `set_` function that accepts
-one or two arguments (like [set_blink][LcdDisplay::set_blink]), through specific conveniance functions ([blink_on][LcdDisplay::blink_on] rather
-than [set_blink][LcdDisplay::set_blink]) or with a builder function (like [with_blink][LcdDisplay::with_blink]).
- 
-If some functions are missing for a settings, its either because it doesn't make sense for that particular setting, or 
-because that feature can only be set *before* the [build][LcdDisplay::build] method is called (in this case only a `with_`
-function is provided).
 
 ## Usage
 
