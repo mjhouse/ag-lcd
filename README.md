@@ -1,5 +1,7 @@
 # AG-LCD
 
+[![ag-lcd docs](https://img.shields.io/badge/docs-ag-lcd-f39f37)][ag-lcd docs]
+
 A feature-complete rust port of the LiquidCrystal library for arduino systems. Some functions and flags
 have been renamed or added for clarity, but all of the same features are available in this library that
 are available in LiquidCrystal.
