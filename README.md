@@ -55,4 +55,4 @@ lcd.print("Test message!");
 
 ## Examples
 
-You can find examples [here](examples/README.md).
+You can find examples [here](examples/).
