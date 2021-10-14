@@ -2,7 +2,7 @@
 
 All examples assume an HD44780 two-line lcd screen connected to an Arduino Nano with the RW pin of the screen connected to 
 ground, using a four-pin configuration (rather than eight). If you are using an eight pin configuration or have the RW pin
-connected, you may need to uncomment or modify these examples to get them to work.
+connected, you may need to uncomment lines or otherwise modify these examples to get them to work.
 
 Pins should be connected as follows:
 
@@ -23,22 +23,22 @@ These examples require [ravedude](https://crates.io/crates/ravedude) to be insta
 Demos the autoscroll feature of HD44780 two-line lcd screens. Autoscroll "scrolls" the display as each character
 is written, effectively pushing the displayed message out to the left as it is printed. The cursor doesn't move.
 
-![Autoscroll Example Gif](media/autoscroll.gif)
+![Autoscroll Example Gif](../media/autoscroll_example.gif)
 
 ## Blink
 
 Blinks the backround of the cursor.
 
-![Blink Example Gif](media/blink.gif)
+![Blink Example Gif](../media/blink_example.gif)
 
 ## Character
 
 Creates a custom character mapping in the CGRAM on the LCD and displays it (a sideways smiley face)
 
-![Character Example Gif](media/character.gif)
+![Character Example Gif](../media/character_example.gif)
 
 ## Cursor
 
 Blinks the cursor on and off.
 
-![Character Example Gif](media/character.gif)
+![Character Example Gif](../media/character_example.gif)
