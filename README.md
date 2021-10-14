@@ -16,6 +16,10 @@ I decided to create a more comprehensive solution because existing libraries wer
 complicated to use. This library relies on [avr-hal](https://github.com/Rahix/avr-hal) as a dependency and expects 
 that downstream projects will also be using avr-hal.
 
+## Building
+
+You'll need to use nightly to compile this project- current there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) in avr-hal that requires nightly-2021-01-07 or older.
+
 ## Usage
 
 ```
@@ -48,3 +52,7 @@ lcd.set_blink(Blink::Off);
 
 lcd.print("Test message!");
 ```
+
+## Examples
+
+You can find examples [here](examples/README.md).
