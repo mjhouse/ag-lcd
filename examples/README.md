@@ -41,4 +41,23 @@ Creates a custom character mapping in the CGRAM on the LCD and displays it (a si
 
 Blinks the cursor on and off.
 
-![Character Example Gif](../media/character_example.gif)
+![Cursor Example Gif](../media/cursor_example.gif)
+
+## Display
+
+Blinks the display on and off.
+
+![Display Example Gif](../media/display_example.gif)
+
+## Layout
+
+Demos the text layout direction setting. Left-to-right is the standard layout direction for english, right-to-left
+prints characters in reverse order and direction.
+
+![Layout Example Gif](../media/layout_example.gif)
+
+## Scroll
+
+Scrolls the display left and right, given a direction and the number of positions to scroll by.
+
+![Scroll Example Gif](../media/scroll_example.gif)
