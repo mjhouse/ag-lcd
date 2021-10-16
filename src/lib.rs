@@ -61,7 +61,6 @@
 use embedded_hal::digital::v2::OutputPin;
 use embedded_hal::blocking::delay::DelayUs;
 use core::convert::Infallible;
-use ufmt::uWrite;
 
 macro_rules! set {
     ( $p:expr, $v:expr ) => {
@@ -1131,7 +1130,8 @@ where
 /// uwriteln!(&mut lcd, "COUNT IS: {}",count);
 /// ```
 ///
-impl<T,D> uWrite for LcdDisplay<T,D>
+#[cfg(feature = "ufmt")]
+impl<T,D> ufmt::uWrite for LcdDisplay<T,D>
 where
     T: OutputPin<Error = Infallible> + Sized,
     D: DelayUs<u16> + Sized,
