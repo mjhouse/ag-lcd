@@ -2,7 +2,7 @@
 
 [![ag-lcd docs](https://img.shields.io/badge/docs-ag--lcd-blue)](https://mjhouse.github.io/ag-lcd/ag_lcd/index.html)
 
-**This library has only been tested on an Arduino Nano. If you test it on other systems and find bugs
+**This library has only been tested on an Arduino Nano (atmega328p). If you test it on other systems and find bugs
 please add issues to this project so that I can fix them.**
 
 This is a rust port of the [LiquidCrystal](https://github.com/arduino-libraries/LiquidCrystal) library. LiquidCrystal 

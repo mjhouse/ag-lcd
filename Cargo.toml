@@ -2,7 +2,7 @@
 name = "ag-lcd"
 version = "0.1.0"
 authors = ["Michael House <mjhouse@protonmail.com>"]
-keywords = [ "arduino", "atmega328p", "avr-hal", "lcd", "HD44780", "LiquidCrystal" ]
+keywords = [ "arduino", "avr-hal", "lcd", "HD44780", "LiquidCrystal" ]
 categories = ["embedded","hardware-support"]
 description = "A rust port of the LiquidCrystal arduino library"
 homepage = "https://github.com/mjhouse/ag-lcd"
