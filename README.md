@@ -19,10 +19,8 @@ and all example code and comments assume you're using avr-hal as well.
 
 ## Building
 
-1. You'll need to use nightly to compile this project- currently there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) 
+You'll need to use nightly to compile this project- currently there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) 
 in avr-hal that requires nightly-2021-01-07 or older.
-
-2. This library has only been tested with the Arduino Nano.
 
 ## Usage
 
@@ -31,24 +29,27 @@ use ag_lcd::{Display, Blink, Cursor, LcdDisplay};
 
 let peripherals = arduino_hal::Peripherals::take().unwrap();
 let pins = arduino_hal::pins!(peripherals);
+let delay = arduino_hal::Delay::new();
 
-let d12 = pins.d12;
-let d11 = pins.d11;
-let d10 = pins.d10;
+let rs = pins.d12.into_output().downgrade();
+let rw = pins.d11.into_output().downgrade();
+let en = pins.d10.into_output().downgrade();
+// let d0 = pins.d9.into_output().downgrade();
+// let d1 = pins.d8.into_output().downgrade();
+// let d2 = pins.d7.into_output().downgrade();
+// let d3 = pins.d6.into_output().downgrade();
+let d4 = pins.d5.into_output().downgrade();
+let d5 = pins.d4.into_output().downgrade();
+let d6 = pins.d3.into_output().downgrade();
+let d7 = pins.d2.into_output().downgrade();
 
-let d2 = pins.d2;
-let d3 = pins.d3;
-let d4 = pins.d4;
-let d5 = pins.d5;
-
-// must provide type for the variable so that rustc
-// can deduce default type values for pins.
-let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    .with_half_bus(d2, d3, d4, d5)
+let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    // .with_full_bus(d0, d1, d2, d3, d4, d5, d6, d7)
+    .with_half_bus(d4, d5, d6, d7)
     .with_display(Display::On)
     .with_blink(Blink::On)
     .with_cursor(Cursor::On)
-    .with_rw(d10)
+    .with_rw(d10) // optional (set to GND if not provided)
     .build();
 
 lcd.set_cursor(Cursor::Off);
