@@ -8,25 +8,25 @@ use panic_halt as _;
 fn main() -> ! {
     let peripherals = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(peripherals);
+    let delay = arduino_hal::Delay::new();
 
-    let d2 = pins.d2;
-    let d3 = pins.d3;
-    let d4 = pins.d4;
-    let d5 = pins.d5;
-    // let d6 = pins.d6;
-    // let d7 = pins.d7;
-    // let d8 = pins.d8;
-    // let d9 = pins.d9;
+    let rs = pins.d12.into_output().downgrade();
+    // let rw = pins.d11.into_output().downgrade();
+    let en = pins.d10.into_output().downgrade();
+    // let d0 = pins.d9.into_output().downgrade();
+    // let d1 = pins.d8.into_output().downgrade();
+    // let d2 = pins.d7.into_output().downgrade();
+    // let d3 = pins.d6.into_output().downgrade();
+    let d4 = pins.d5.into_output().downgrade();
+    let d5 = pins.d4.into_output().downgrade();
+    let d6 = pins.d3.into_output().downgrade();
+    let d7 = pins.d2.into_output().downgrade();
 
-    // let d10 = pins.d10;
-    let d11 = pins.d11;
-    let d12 = pins.d12;
-
-    let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-        .with_half_bus(d2, d3, d4, d5)
-        // .with_full_bus(d2, d3, d4, d5, d6, d7, d8, d9)
+    let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en,delay)
+        .with_half_bus(d4, d5, d6, d7)
+        // .with_full_bus(d0, d1, d2, d3, d4, d5, d6, d7)
         .with_blink(Blink::On)
-        // .with_rw(d10)
+        // .with_rw(rw)
         .build();
 
     lcd.set_character(0u8,[
@@ -40,9 +40,7 @@ fn main() -> ! {
         0b00110
     ]);
 
-    lcd.clear();
-    lcd.set_position(0,0);
-    
+    lcd.home();
     lcd.write(0u8);
 
     loop {

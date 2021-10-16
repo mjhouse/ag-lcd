@@ -9,15 +9,16 @@
 //! * [lcd1602](https://crates.io/crates/lcd1602-rs)
 //!
 //! I decided to create a more comprehensive solution because existing libraries were either incomplete or somewhat
-//! complicated to use. This library relies on [avr-hal](https://github.com/Rahix/avr-hal) as a dependency and expects 
-//! that downstream projects will also be using avr-hal.
-//!  
+//! complicated to use. This library uses traits from [embedded-hal](https://crates.io/crates/embedded-hal) and should work
+//! with any hardware abstraction layer that uses the same types. Currently this crate has only been tested with [avr-hal](https://github.com/Rahix/avr-hal)
+//! and all example code and comments assume you're using avr-hal as well.
+//!
 //! Most features (blink, cursor, text direction etc.) can be set either through a general `set_` function that accepts
 //! one or two arguments (like [set_blink][LcdDisplay::set_blink]), through specific conveniance functions ([blink_on][LcdDisplay::blink_on] rather
 //! than [set_blink][LcdDisplay::set_blink]) or with a builder function (like [with_blink][LcdDisplay::with_blink]).
 //! 
 //! If some functions are missing for a settings, its either because it doesn't make sense for that particular setting, or 
-//! because that feature can only be set *before* the [build][LcdDisplay::build] method is called (in this case only a `with_`
+//! because that feature can only be set *before* the [build][LcdDisplay::build] method is called (in which case only a `with_`
 //! function is provided).
 //!
 //! ## Usage
@@ -27,24 +28,27 @@
 //!
 //! let peripherals = arduino_hal::Peripherals::take().unwrap();
 //! let pins = arduino_hal::pins!(peripherals);
+//! let delay = arduino_hal::Delay::new();
 //!
-//! let d12 = pins.d12;
-//! let d11 = pins.d11;
-//! let d10 = pins.d10;
+//! let rs = pins.d12.into_output().downgrade();
+//! let rw = pins.d11.into_output().downgrade();
+//! let en = pins.d10.into_output().downgrade();
+//! // let d0 = pins.d9.into_output().downgrade();
+//! // let d1 = pins.d8.into_output().downgrade();
+//! // let d2 = pins.d7.into_output().downgrade();
+//! // let d3 = pins.d6.into_output().downgrade();
+//! let d4 = pins.d5.into_output().downgrade();
+//! let d5 = pins.d4.into_output().downgrade();
+//! let d6 = pins.d3.into_output().downgrade();
+//! let d7 = pins.d2.into_output().downgrade();
 //!
-//! let d2 = pins.d2;
-//! let d3 = pins.d3;
-//! let d4 = pins.d4;
-//! let d5 = pins.d5;
-//!
-//! // must provide type for the variable so that rustc
-//! // can deduce default type values for pins.
-//! let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-//!     .with_half_bus(d2, d3, d4, d5)
+//! let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+//!     // .with_full_bus(d0, d1, d2, d3, d4, d5, d6, d7)
+//!     .with_half_bus(d4, d5, d6, d7)
 //!     .with_display(Display::On)
 //!     .with_blink(Blink::On)
 //!     .with_cursor(Cursor::On)
-//!     .with_rw(d10)
+//!     .with_rw(d10) // optional (set to GND if not provided)
 //!     .build();
 //!
 //! lcd.set_cursor(Cursor::Off);
@@ -54,35 +58,25 @@
 //! ```
 //!
 
-use arduino_hal::hal::port::{
-    mode::{Input, InputMode, Output},
-    Pin, PB0, PB1, PB2, PB3, PB4, PD2, PD3, PD4, PD5, PD6, PD7,
-};
-use avr_hal_generic::port::PinOps;
-
-macro_rules! delay {
-    ( $t:expr ) => {
-        arduino_hal::delay_us($t)
-    };
-}
+use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::blocking::delay::DelayUs;
+use core::convert::Infallible;
+use ufmt::uWrite;
 
 macro_rules! set {
-    ( $p:expr, $v:expr, $i:literal ) => {
-        if let Some(pin) = $p.as_mut() {
-            if ($v >> $i) & 0x01 > 0 {
-                pin.set_high();
-            } else {
-                pin.set_low();
-            }
-        }
-    };
     ( $p:expr, $v:expr ) => {
         set!($p, $v, 0);
     };
+    ( $p:expr, $v:expr, $i:literal ) => {
+        if let Some(pin) = $p.as_mut() {
+            if ($v >> $i) & 0x01 > 0 {
+                pin.set_high().unwrap();
+            } else {
+                pin.set_low().unwrap();
+            }
+        }
+    };
 }
-
-type InputPin<M, T> = Pin<Input<M>, T>;
-type OutputPin<T> = Pin<Output, T>;
 
 #[repr(u8)]
 #[allow(dead_code)]
@@ -171,58 +165,41 @@ const DEFAULT_DISPLAY_FUNC: u8 = Mode::FourBits as u8 | Lines::OneLine as u8 | S
 const DEFAULT_DISPLAY_CTRL: u8 = Display::On as u8 | Cursor::Off as u8 | Blink::Off as u8;
 const DEFAULT_DISPLAY_MODE: u8 = Layout::LeftToRight as u8 | AutoScroll::Off as u8;
 
-const CMD_DELAY: u32 = 2900;
-const CHR_DELAY: u32 = 320;
+const CMD_DELAY: u16 = 3500;
+const CHR_DELAY: u16 = 450;
 
 /// The LCD display
 ///
 /// Methods called on this struct will fail silently if the system or screen is
-/// misconfigured. Should never panic.
-pub struct LcdDisplay<
-    Rs = PB4, // d12
-    En = PB3, // d11
-    Rw = PB2, // d10
-    D1 = PD2, // d2
-    D2 = PD3, // d3
-    D3 = PD4, // d4
-    D4 = PD5, // d5
-    D5 = PD6, // d6
-    D6 = PD7, // d7
-    D7 = PB0, // d8
-    D8 = PB1, // d9
-> {
-    rs: Option<OutputPin<Rs>>,
-    en: Option<OutputPin<En>>,
-    rw: Option<OutputPin<Rw>>,
-    d1: Option<OutputPin<D1>>,
-    d2: Option<OutputPin<D2>>,
-    d3: Option<OutputPin<D3>>,
-    d4: Option<OutputPin<D4>>,
-    d5: Option<OutputPin<D5>>,
-    d6: Option<OutputPin<D6>>,
-    d7: Option<OutputPin<D7>>,
-    d8: Option<OutputPin<D8>>,
+/// misconfigured.
+pub struct LcdDisplay<T,D>
+where
+    T: OutputPin<Error = Infallible> + Sized,
+    D: DelayUs<u16> + Sized,
+{
+    rs: Option<T>,
+    en: Option<T>,
+    rw: Option<T>,
+    d0: Option<T>,
+    d1: Option<T>,
+    d2: Option<T>,
+    d3: Option<T>,
+    d4: Option<T>,
+    d5: Option<T>,
+    d6: Option<T>,
+    d7: Option<T>,
     display_func: u8,
     display_mode: u8,
     display_ctrl: u8,
     offsets: [u8; 4],
+    delay: D,
 }
 
-impl<Rs, En, Rw, D1, D2, D3, D4, D5, D6, D7, D8> LcdDisplay<Rs, En, Rw, D1, D2, D3, D4, D5, D6, D7, D8>
+impl<T,D> LcdDisplay<T,D>
 where
-    Rs: PinOps,
-    En: PinOps,
-    Rw: PinOps,
-    D1: PinOps,
-    D2: PinOps,
-    D3: PinOps,
-    D4: PinOps,
-    D5: PinOps,
-    D6: PinOps,
-    D7: PinOps,
-    D8: PinOps,
+    T: OutputPin<Error = Infallible> + Sized,
+    D: DelayUs<u16> + Sized,
 {
-
     /// Create a new instance of the LcdDisplay
     ///
     /// # Examples
@@ -230,30 +207,29 @@ where
     /// ```
     /// let peripherals = arduino_hal::Peripherals::take().unwrap();
     /// let pins = arduino_hal::pins!(peripherals);
+    /// let delay = arduino_hal::Delay::new();
     ///
-    /// let d12 = pins.d12;
-    /// let d11 = pins.d11;
+    /// let rs = pins.d12.into_output().downgrade();
+    /// let rw = pins.d11.into_output().downgrade();
+    /// let en = pins.d10.into_output().downgrade();
+    /// let d4 = pins.d5.into_output().downgrade();
+    /// let d5 = pins.d4.into_output().downgrade();
+    /// let d6 = pins.d3.into_output().downgrade();
+    /// let d7 = pins.d2.into_output().downgrade();
     ///
-    /// let d2 = pins.d2;
-    /// let d3 = pins.d3;
-    /// let d4 = pins.d4;
-    /// let d5 = pins.d5;
-    ///
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_blink(Blink::On)
     ///     .with_cursor(Cursor::Off)
     ///     .with_rw(d10)
     ///     .build();
     /// ```
-    pub fn new<M>(rs: InputPin<M, Rs>, en: InputPin<M, En>) -> Self
-    where
-        M: InputMode,
-    {
+    pub fn new(rs: T, en: T, delay: D) -> Self {
         Self {
-            rs: Some(rs.into_output()),
-            en: Some(en.into_output()),
+            rs: Some(rs),
+            en: Some(en),
             rw: None,
+            d0: None,
             d1: None,
             d2: None,
             d3: None,
@@ -261,77 +237,79 @@ where
             d5: None,
             d6: None,
             d7: None,
-            d8: None,
             display_func: DEFAULT_DISPLAY_FUNC,
             display_mode: DEFAULT_DISPLAY_MODE,
             display_ctrl: DEFAULT_DISPLAY_CTRL,
             offsets: [0, 0, 0, 0],
+            delay: delay,
         }
     }
 
     /// Set four pins that connect to the lcd screen and configure the display for four-pin mode.
     ///
+    /// The parameters below (d4-d7) are labeled in the order that you should see on the LCD
+    /// itself. Regardless of how the display is connected to the arduino, 'D4' on the LCD should
+    /// map to 'd4' when calling this function.
+    ///
     /// # Examples
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .build();
     /// ```
-    pub fn with_half_bus<M>(
+    pub fn with_half_bus(
         mut self,
-        d1: InputPin<M, D1>,
-        d2: InputPin<M, D2>,
-        d3: InputPin<M, D3>,
-        d4: InputPin<M, D4>,
-    ) -> Self
-    where
-        M: InputMode,
-    {
+        d4: T,
+        d5: T,
+        d6: T,
+        d7: T,
+    ) -> Self {
         // set to four-bit bus mode and assign pins
         self.display_func &= !(Mode::EightBits as u8);
-        self.d1 = Some(d1.into_output());
-        self.d2 = Some(d2.into_output());
-        self.d3 = Some(d3.into_output());
-        self.d4 = Some(d4.into_output());
+        self.d4 = Some(d4);
+        self.d5 = Some(d5);
+        self.d6 = Some(d6);
+        self.d7 = Some(d7);
         self
     }
 
     /// Set eight pins that connect to the lcd screen and configure the display for eight-pin mode.
     ///
+    /// The parameters below (d0-d7) are labeled in the order that you should see on the LCD
+    /// itself. Regardless of how the display is connected to the arduino, 'D4' on the LCD should
+    /// map to 'd4' when calling this function.
+    ///
     /// # Examples
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_full_bus(d2, d3, d4, d5, d6, d7, d8, d9)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_full_bus(d0, d1, d4, d5, d6, d7, d6, d7)
     ///     .build();
     /// ```
-    pub fn with_full_bus<M>(
+    pub fn with_full_bus(
         mut self,
-        d1: InputPin<M, D1>,
-        d2: InputPin<M, D2>,
-        d3: InputPin<M, D3>,
-        d4: InputPin<M, D4>,
-        d5: InputPin<M, D5>,
-        d6: InputPin<M, D6>,
-        d7: InputPin<M, D7>,
-        d8: InputPin<M, D8>,
-    ) -> Self
-    where
-        M: InputMode,
-    {
+        d0: T,
+        d1: T,
+        d2: T,
+        d3: T,
+        d4: T,
+        d5: T,
+        d6: T,
+        d7: T,
+    ) -> Self {
         // set to eight-bit bus mode and assign pins
         self.display_func |= Mode::EightBits as u8;
-        self.d1 = Some(d1.into_output());
-        self.d2 = Some(d2.into_output());
-        self.d3 = Some(d3.into_output());
-        self.d4 = Some(d4.into_output());
-        self.d5 = Some(d5.into_output());
-        self.d6 = Some(d6.into_output());
-        self.d7 = Some(d7.into_output());
-        self.d8 = Some(d8.into_output());
+        self.d0 = Some(d0);
+        self.d1 = Some(d1);
+        self.d2 = Some(d2);
+        self.d3 = Some(d3);
+        self.d4 = Some(d4);
+        self.d5 = Some(d5);
+        self.d6 = Some(d6);
+        self.d7 = Some(d7);
         self
     }
 
@@ -342,16 +320,13 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_rw(d10)
     ///     .build();
     /// ```
-    pub fn with_rw<M>(mut self, rw: InputPin<M, Rw>) -> Self 
-    where 
-        M: InputMode,
-    {
-        self.rw = Some(rw.into_output());
+    pub fn with_rw(mut self, rw: T) -> Self {
+        self.rw = Some(rw);
         self
     }
 
@@ -361,8 +336,8 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_size(Size::Dots5x8)
     ///     .build();
     /// ```
@@ -380,8 +355,8 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_lines(Lines::OneLine)
     ///     .build();
     /// ```
@@ -399,8 +374,8 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_layout(Layout::LeftToRight)
     ///     .build();
     /// ```
@@ -418,8 +393,8 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_display(Display::On)
     ///     .build();
     /// ```
@@ -437,8 +412,8 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_cursor(Cursor::Off)
     ///     .build();
     /// ```
@@ -456,8 +431,8 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_blink(Blink::Off)
     ///     .build();
     /// ```
@@ -475,8 +450,8 @@ where
     ///
     /// ```
     /// ...
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_autoscroll(AutoScroll::Off)
     ///     .build();
     /// ```
@@ -498,23 +473,19 @@ where
     ///
     /// let peripherals = arduino_hal::Peripherals::take().unwrap();
     /// let pins = arduino_hal::pins!(peripherals);
+    /// let delay = arduino_hal::Delay::new();
     ///
-    /// let d12 = pins.d12;
-    /// let d11 = pins.d11;
-    /// let d10 = pins.d10;
+    /// let d12 = pins.d12.into_output().downgrade();
+    /// let d11 = pins.d11.into_output().downgrade();
+    /// let d10 = pins.d10.into_output().downgrade();
     ///
-    /// let d2 = pins.d2;
-    /// let d3 = pins.d3;
-    /// let d4 = pins.d4;
-    /// let d5 = pins.d5;
+    /// let d2 = pins.d2.into_output().downgrade();
+    /// let d3 = pins.d3.into_output().downgrade();
+    /// let d4 = pins.d4.into_output().downgrade();
+    /// let d5 = pins.d5.into_output().downgrade();
     ///
-    /// // Capital 'D<N>' pins are on the LCD, lowercase are 
-    /// // on the arduino. 
-    ///
-    /// // d12 = RS, d11 = Enable
-    /// let mut lcd: LcdDisplay = LcdDisplay::new(d12, d11)
-    ///     // d2 = D7, d3 = D6, d4 = D5, d5 = D4
-    ///     .with_half_bus(d2, d3, d4, d5)
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_display(Display::On)
     ///     .with_blink(Blink::On)
     ///     .with_cursor(Cursor::On)
@@ -524,7 +495,7 @@ where
     /// lcd.print("Test message!");
     /// ```
     pub fn build(mut self) -> Self {
-        delay!(50000);
+        self.delay.delay_us(50000);
         set!(self.rs, 0);
         set!(self.en, 0);
         set!(self.rw, 0);
@@ -540,36 +511,36 @@ where
             Mode::FourBits => {
                 // display function is four bit
                 self.update(0x03);
-                delay!(4500);
+                self.delay.delay_us(4500);
 
                 self.update(0x03);
-                delay!(4500);
+                self.delay.delay_us(4500);
 
                 self.update(0x03);
-                delay!(150);
+                self.delay.delay_us(150);
 
                 self.update(0x02);
             }
             Mode::EightBits => {
                 // display function is eight bit
                 self.command(Command::SetDisplayFunc as u8 | self.display_func);
-                delay!(4500);
+                self.delay.delay_us(4500);
 
                 self.command(Command::SetDisplayFunc as u8 | self.display_func);
-                delay!(150);
+                self.delay.delay_us(150);
 
                 self.command(Command::SetDisplayFunc as u8 | self.display_func);
             }
         }
 
         self.command(Command::SetDisplayFunc as u8 | self.display_func);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
 
         self.command(Command::SetDisplayCtrl as u8 | self.display_ctrl);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
 
         self.command(Command::SetDisplayMode as u8 | self.display_mode);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
 
         self.clear();
         self.home();
@@ -582,7 +553,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// let row = 0;
     /// let col = 2;
@@ -609,7 +580,7 @@ where
 
         pos += self.offsets[row as usize];
         self.command(Command::SetDDRAMAddr as u8 | pos);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Scroll the display right or left.
@@ -617,7 +588,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// let direction = Scroll::Left;
     /// let distance = 2;
@@ -628,7 +599,7 @@ where
         let command = Command::CursorShift as u8 | Move::Display as u8 | direction as u8;
         for _ in 0..distance {
             self.command(command);
-            delay!(CMD_DELAY);
+            self.delay.delay_us(CMD_DELAY);
         }
     }
 
@@ -637,7 +608,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// lcd.set_layout(Layout::LeftToRight);
     /// ```
@@ -647,7 +618,7 @@ where
             Layout::RightToLeft => self.display_mode &= !(Layout::LeftToRight as u8),
         }
         self.command(Command::SetDisplayMode as u8 | self.display_mode);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Turn the display on or off.
@@ -655,7 +626,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// lcd.set_display(Display::Off);
     /// ```
@@ -665,7 +636,7 @@ where
             Display::Off => self.display_ctrl &= !(Display::On as u8),
         }
         self.command(Command::SetDisplayCtrl as u8 | self.display_ctrl);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Turn the cursor on or off.
@@ -673,7 +644,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// lcd.set_cursor(Cursor::On);
     /// ```
@@ -683,7 +654,7 @@ where
             Cursor::Off => self.display_ctrl &= !(Cursor::On as u8),
         }
         self.command(Command::SetDisplayCtrl as u8 | self.display_ctrl);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Make the background of the cursor blink or stop blinking.
@@ -691,7 +662,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// lcd.set_blink(Blink::On);
     /// ```
@@ -701,7 +672,7 @@ where
             Blink::Off => self.display_ctrl &= !(Blink::On as u8),
         }
         self.command(Command::SetDisplayCtrl as u8 | self.display_ctrl);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Turn auto scroll on or off.
@@ -709,7 +680,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// lcd.set_autoscroll(AutoScroll::On);
     /// ```
@@ -719,7 +690,7 @@ where
             AutoScroll::Off => self.display_mode &= !(AutoScroll::On as u8),
         }
         self.command(Command::SetDisplayMode as u8 | self.display_mode);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Add a new character map to the LCD memory (CGRAM) at a particular location.
@@ -730,7 +701,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     ///
     /// // set a sideways smiley face in CGRAM at location 0.
     /// lcd.set_character(0u8,[
@@ -760,12 +731,12 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.clear();
     /// ```
     pub fn clear(&mut self) {
         self.command(Command::ClearDisplay as u8);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Move the cursor to the home position.
@@ -773,12 +744,12 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.home(); // cursor should be top-left
     /// ```
     pub fn home(&mut self) {
         self.command(Command::ReturnHome as u8);
-        delay!(CMD_DELAY);
+        self.delay.delay_us(CMD_DELAY);
     }
 
     /// Scroll the display to the right. (See [set_scroll][LcdDisplay::set_scroll])
@@ -786,7 +757,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.scroll_right(2); // display scrolls 2 positions to the right.
     /// ```
     pub fn scroll_right(&mut self, value: u8) {
@@ -798,7 +769,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.scroll_left(2); // display scrolls 2 positions to the left.
     /// ```
     pub fn scroll_left(&mut self, value: u8) {
@@ -810,7 +781,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.layout_left_to_right();
     /// ```
     pub fn layout_left_to_right(&mut self) {
@@ -822,7 +793,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.layout_right_to_left();
     /// ```
     pub fn layout_right_to_left(&mut self) {
@@ -834,7 +805,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.display_on();
     /// ```
     pub fn display_on(&mut self) {
@@ -846,7 +817,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.display_off();
     /// ```
     pub fn display_off(&mut self) {
@@ -858,7 +829,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.cursor_on();
     /// ```
     pub fn cursor_on(&mut self) {
@@ -870,7 +841,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.cursor_off();
     /// ```
     pub fn cursor_off(&mut self) {
@@ -882,7 +853,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.blink_on();
     /// ```
     pub fn blink_on(&mut self) {
@@ -894,7 +865,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.blink_off();
     /// ```
     pub fn blink_off(&mut self) {
@@ -906,7 +877,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.autoscroll_on();
     /// ```
     pub fn autoscroll_on(&mut self) {
@@ -918,7 +889,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.autoscroll_off();
     /// ```
     pub fn autoscroll_off(&mut self) {
@@ -930,7 +901,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// let mode = lcd.mode();
     /// ```
     pub fn mode(&self) -> Mode {
@@ -946,7 +917,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// let layout = lcd.layout();
     /// ```
     pub fn layout(&self) -> Layout {
@@ -962,7 +933,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// let display = lcd.display();
     /// ```
     pub fn display(&self) -> Display {
@@ -978,7 +949,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// let cursor = lcd.cursor();
     /// ```
     pub fn cursor(&self) -> Cursor {
@@ -994,7 +965,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// let blink = lcd.blink();
     /// ```
     pub fn blink(&self) -> Blink {
@@ -1010,7 +981,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// let autoscroll = lcd.autoscroll();
     /// ```
     pub fn autoscroll(&self) -> AutoScroll {
@@ -1026,7 +997,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// let lines = lcd.lines();
     /// ```
     pub fn lines(&self) -> Lines {
@@ -1042,7 +1013,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.print("TEST MESSAGE");
     /// ```
     pub fn print(&mut self, text: &str) {
@@ -1056,11 +1027,11 @@ where
     /// # Examples
     ///
     /// ```
-    /// let mut lcd: LcdDisplay = ...;
+    /// let mut lcd: LcdDisplay<_,_> = ...;
     /// lcd.write('A' as u8);
     /// ```
     pub fn write(&mut self, value: u8) {
-        delay!(CHR_DELAY);
+        self.delay.delay_us(CHR_DELAY);
         self.send(value, 1);
     }
 
@@ -1110,20 +1081,20 @@ where
         set!(self.en, 0);
         match self.mode() {
             Mode::FourBits => {
+                set!(self.d7, byte, 3);
+                set!(self.d6, byte, 2);
+                set!(self.d5, byte, 1);
                 set!(self.d4, byte, 0);
-                set!(self.d3, byte, 1);
-                set!(self.d2, byte, 2);
-                set!(self.d1, byte, 3);
             }
             Mode::EightBits => {
-                set!(self.d4, byte, 0);
-                set!(self.d3, byte, 1);
-                set!(self.d2, byte, 2);
-                set!(self.d1, byte, 3);
-                set!(self.d8, byte, 4);
-                set!(self.d7, byte, 5);
+                set!(self.d7, byte, 7);
                 set!(self.d6, byte, 6);
-                set!(self.d5, byte, 7);
+                set!(self.d5, byte, 5);
+                set!(self.d4, byte, 4);
+                set!(self.d3, byte, 3);
+                set!(self.d2, byte, 2);
+                set!(self.d1, byte, 1);
+                set!(self.d0, byte, 0);
             }
         };
         self.pulse();
@@ -1141,4 +1112,38 @@ where
         set!(self.en, 1);
         set!(self.en, 0);
     }
+}
+
+/// Implementation of ufmt::uWrite
+///
+/// This trait allows us to use the uwrite/uwriteln macros from ufmt
+/// to format arbitrary arguments (that have the appropriate uDisplay or uDebug traits
+/// implemented) into a string to display on the lcd screen.
+///
+/// # Examples
+/// 
+/// ```
+/// let mut lcd: LcdDisplay<_,_> = ...;
+/// 
+/// let count = 3;
+/// uwriteln!(&mut lcd, "COUNT IS: {}",count);
+/// ```
+///
+impl<T,D> uWrite for LcdDisplay<T,D>
+where
+    T: OutputPin<Error = Infallible> + Sized,
+    D: DelayUs<u16> + Sized,
+{
+    type Error = Infallible;
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        self.print(s);
+        Ok(())
+    }
+
+    fn write_char(&mut self, c: char) -> Result<(), Self::Error> {
+        self.write(c as u8);
+        Ok(())
+    }
+
 }

@@ -12,24 +12,16 @@ license = "GPL-3.0-or-later"
 edition = "2018"
 readme = "README.md"
 
-
 [dependencies]
+embedded-hal = "0.2.3"
 ufmt = "0.1.0"
 
 [dev-dependencies]
 panic-halt = "0.2.0"
 
-[dependencies.arduino-hal]
-git = "https://github.com/rahix/avr-hal"
-rev = "ac72adbe6db8900c41681b759ff62a11f2915916"
-
-[dependencies.avr-hal-generic]
-git = "https://github.com/rahix/avr-hal"
-rev = "ac72adbe6db8900c41681b759ff62a11f2915916"
-
 [dev-dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"
-rev = "ac72adbe6db8900c41681b759ff62a11f2915916"
+rev = "8ad1be6d95b075d13bca611d177a4cc8b9896d77"
 features = ["arduino-nano"]
 
 [profile.dev]

@@ -18,7 +18,8 @@ that downstream projects will also be using avr-hal.
 
 ## Building
 
-You'll need to use nightly to compile this project- current there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) in avr-hal that requires nightly-2021-01-07 or older.
+You'll need to use nightly to compile this project- currently there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) 
+in avr-hal that requires nightly-2021-01-07 or older.
 
 ## Usage
 
