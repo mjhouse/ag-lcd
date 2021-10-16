@@ -1,24 +1,30 @@
 # AG-LCD Examples
 
-All examples assume an HD44780 two-line LCD screen connected to an Arduino Nano with the RW pin of the screen connected to 
-ground, using a four-pin configuration (rather than eight). If you are using an eight pin configuration or have the RW pin
-connected, you may need to uncomment lines or otherwise modify these examples to get them to work.
+All examples assume: 
 
-Pins should be connected as follows (Only required are uncommented in examples):
+* A HD44780 two-line LCD screen 
+* An Arduino Nano 
+* RW pin of the LCD display is connected to GND
+* At D4-D7 pins on LCD are connected to Nano
+
+If you are using an eight pin configuration or have the RW pin connected, you may need to 
+uncomment lines or otherwise modify these examples to get them to work.  
+
+Pins should be connected as follows (optional pins are commented in examples):
 
 | Nano | LCD      | Required |
 |------|----------|----------|
 | d12  | RS       | YES      |
-| d11  | E/Enable | YES      |
-| d10  | RW       | NO       |
-| d2   | D4       | YES      |
-| d3   | D5       | YES      |
-| d4   | D6       | YES      |
-| d5   | D7       | YES      |
-| d6   | D0       | NO       |
-| d7   | D1       | NO       |
-| d8   | D2       | NO       |
-| d9   | D3       | NO       |
+| d11  | RW       | NO       |
+| d10  | E/Enable | YES      |
+| d9   | D0       | NO       |
+| d8   | D1       | NO       |
+| d7   | D2       | NO       |
+| d6   | D3       | NO       |
+| d5   | D4       | YES      |
+| d4   | D5       | YES      |
+| d3   | D6       | YES      |
+| d2   | D7       | YES      |
 
 These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.  
 
