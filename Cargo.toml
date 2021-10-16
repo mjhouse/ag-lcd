@@ -1,12 +1,10 @@
 [package]
 name = "ag-lcd"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Michael House <mjhouse@protonmail.com>"]
 keywords = [ "arduino", "avr-hal", "lcd", "HD44780", "LiquidCrystal" ]
 categories = ["embedded","hardware-support"]
 description = "A rust port of the LiquidCrystal arduino library"
-homepage = "https://github.com/mjhouse/ag-lcd"
-documentation = "https://mjhouse.github.io/ag-lcd/"
 repository = "https://github.com/mjhouse/ag-lcd"
 license = "GPL-3.0-or-later"
 edition = "2018"
