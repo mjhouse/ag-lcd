@@ -57,7 +57,3 @@ lcd.set_blink(Blink::Off);
 
 lcd.print("Test message!");
 ```
-
-## Examples
-
-You can find examples [here](examples/).
