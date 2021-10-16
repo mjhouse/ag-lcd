@@ -11,7 +11,7 @@ repository = "https://github.com/mjhouse/ag-lcd"
 license = "GPL-3.0-or-later"
 edition = "2018"
 readme = "README.md"
-exclude = ["media/*", "reference/*", "examples/*"]
+exclude = ["media/*", "references/*"]
 
 [dependencies]
 embedded-hal = "0.2.3"
