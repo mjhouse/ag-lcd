@@ -5,7 +5,8 @@ All examples assume:
 * A HD44780 two-line LCD screen 
 * An Arduino Nano 
 * RW pin of the LCD display is connected to GND
-* At D4-D7 pins on LCD are connected to Nano
+* D4-D7 pins on LCD are connected to Nano
+* RS and E (Enable) are connected to Nano
 
 If you are using an eight pin configuration or have the RW pin connected, you may need to 
 uncomment lines or otherwise modify these examples to get them to work.  
