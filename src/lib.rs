@@ -221,7 +221,7 @@ where
     ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_blink(Blink::On)
     ///     .with_cursor(Cursor::Off)
-    ///     .with_rw(d10)
+    ///     .with_rw(d10) // optional (set lcd pin to GND if not provided)
     ///     .build();
     /// ```
     pub fn new(rs: T, en: T, delay: D) -> Self {
@@ -475,21 +475,22 @@ where
     /// let pins = arduino_hal::pins!(peripherals);
     /// let delay = arduino_hal::Delay::new();
     ///
-    /// let d12 = pins.d12.into_output().downgrade();
-    /// let d11 = pins.d11.into_output().downgrade();
-    /// let d10 = pins.d10.into_output().downgrade();
+    /// let rs = pins.d12.into_output().downgrade();
+    /// let rw = pins.d11.into_output().downgrade();
+    /// let en = pins.d10.into_output().downgrade();
     ///
-    /// let d2 = pins.d2.into_output().downgrade();
-    /// let d3 = pins.d3.into_output().downgrade();
-    /// let d4 = pins.d4.into_output().downgrade();
-    /// let d5 = pins.d5.into_output().downgrade();
+    /// // left-side names refer to lcd pinout (e.g. 'd4' = D4 on lcd)
+    /// let d4 = pins.d5.into_output().downgrade();
+    /// let d5 = pins.d4.into_output().downgrade();
+    /// let d6 = pins.d3.into_output().downgrade();
+    /// let d7 = pins.d2.into_output().downgrade();
     ///
     /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
     ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_display(Display::On)
     ///     .with_blink(Blink::On)
     ///     .with_cursor(Cursor::On)
-    ///     .with_rw(d10)
+    ///     .with_rw(rw) // optional (set lcd pin to GND if not provided)
     ///     .build();
     ///
     /// lcd.print("Test message!");
@@ -716,6 +717,7 @@ where
     /// ]);
     ///
     /// // write the character code for the custom character.
+    /// lcd.home();
     /// lcd.write(0u8);
     /// ```
     pub fn set_character(&mut self, mut location: u8, map: [u8;8]) {

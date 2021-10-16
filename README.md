@@ -13,13 +13,16 @@ LCD screen with one or two 16-character lines. Alternatives to this library (tha
 * [lcd1602](https://crates.io/crates/lcd1602-rs)
 
 I decided to create a more comprehensive solution because existing libraries were either incomplete or somewhat
-complicated to use. This library relies on [avr-hal](https://github.com/Rahix/avr-hal) as a dependency and expects 
-that downstream projects will also be using avr-hal.
+complicated to use. This library uses traits from [embedded-hal](https://crates.io/crates/embedded-hal) and should work
+with any hardware abstraction layer that uses the same types. Currently this crate has only been tested with [avr-hal](https://github.com/Rahix/avr-hal)
+and all example code and comments assume you're using avr-hal as well.
 
 ## Building
 
-You'll need to use nightly to compile this project- currently there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) 
+1. You'll need to use nightly to compile this project- currently there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) 
 in avr-hal that requires nightly-2021-01-07 or older.
+
+2. This library has only been tested with the Arduino Nano.
 
 ## Usage
 
