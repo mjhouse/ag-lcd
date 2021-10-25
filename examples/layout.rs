@@ -26,7 +26,7 @@ fn main() -> ! {
         .with_half_bus(d4, d5, d6, d7)
         // .with_full_bus(d0, d1, d2, d3, d4, d5, d6, d7)
         .with_layout(Layout::LeftToRight)
-        .with_rw(rw)
+        // .with_rw(rw)
         .build();
 
     let message = "TEST";

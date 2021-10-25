@@ -11,7 +11,7 @@ fn main() -> ! {
     let delay = arduino_hal::Delay::new();
 
     let rs = pins.d12.into_output().downgrade();
-    let rw = pins.d11.into_output().downgrade();
+    // let rw = pins.d11.into_output().downgrade();
     let en = pins.d10.into_output().downgrade();
     // let d0 = pins.d9.into_output().downgrade();
     // let d1 = pins.d8.into_output().downgrade();
@@ -25,7 +25,7 @@ fn main() -> ! {
     let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en,delay)
         .with_half_bus(d4, d5, d6, d7)
         // .with_full_bus(d0, d1, d2, d3, d4, d5, d6, d7)
-        .with_rw(rw)
+        // .with_rw(rw)
         .build();
 
     lcd.display_on();
