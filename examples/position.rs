@@ -11,7 +11,7 @@ fn main() -> ! {
     let delay = arduino_hal::Delay::new();
 
     let rs = pins.d12.into_output().downgrade();
-    // let rw = pins.d11.into_output().downgrade();
+    let rw = pins.d11.into_output().downgrade();
     let en = pins.d10.into_output().downgrade();
     // let d0 = pins.d9.into_output().downgrade();
     // let d1 = pins.d8.into_output().downgrade();
@@ -22,12 +22,12 @@ fn main() -> ! {
     let d6 = pins.d3.into_output().downgrade();
     let d7 = pins.d2.into_output().downgrade();
 
-    let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en,delay)
+    let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
         .with_half_bus(d4, d5, d6, d7)
         // .with_full_bus(d0, d1, d2, d3, d4, d5, d6, d7)
         .with_blink(Blink::On)
         .with_lines(Lines::TwoLines)
-        // .with_rw(rw)
+        .with_rw(rw)
         .build();
 
     let data: [[&str; 16]; 2] = [

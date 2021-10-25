@@ -1,4 +1,6 @@
 #![no_std]
+#![deny(unsafe_code)]
+#![deny(missing_docs)]
 //! # AG-LCD
 //!
 //! This is a rust port of the [LiquidCrystal](https://github.com/arduino-libraries/LiquidCrystal) library. LiquidCrystal 
@@ -100,63 +102,90 @@ enum Move {
 /// Flag that controls text direction
 #[repr(u8)]
 pub enum Layout {
+    /// Text runs from right to left
     RightToLeft = 0x00, // LCD_ENTRYRIGHT
+
+    /// Text runs from left to right (default)
     LeftToRight = 0x02, // LCD_ENTRYLEFT
 }
 
 /// Flag that sets the display to autoscroll
 #[repr(u8)]
 pub enum AutoScroll {
+    /// Turn AutoScroll on
     On = 0x01,  // LCD_ENTRYSHIFTINCREMENT
+
+    /// Turn AutoScroll off (default)
     Off = 0x00, // LCD_ENTRYSHIFTDECREMENT
 }
 
 /// Flag that sets the display on/off
 #[repr(u8)]
 pub enum Display {
+    /// Turn Display on (default)
     On = 0x04,  // LCD_DISPLAYON
+
+    /// Turn Display off
     Off = 0x00, // LCD_DISPLAYOFF
 }
 
 /// Flag that sets the cursor on/off
 #[repr(u8)]
 pub enum Cursor {
+    /// Turn Cursor on 
     On = 0x02,  // LCD_CURSORON
+
+    /// Turn Cursor off
     Off = 0x00, // LCD_CURSOROFF
 }
 
 /// Flag that sets cursor background to blink
 #[repr(u8)]
 pub enum Blink {
+    /// Turn Blink on
     On = 0x01,  // LCD_BLINKON
+
+    /// Turn Blink off (default)
     Off = 0x00, // LCD_BLINKOFF
 }
 
 /// Flag used to indicate direction for display scrolling
 #[repr(u8)]
 pub enum Scroll {
+    /// Scroll display right
     Right = 0x04, // LCD_MOVERIGHT
+
+    /// Scroll display left
     Left = 0x00,  // LCD_MOVELEFT
 }
 
 /// Flag for the bus mode of the display
 #[repr(u8)]
 pub enum Mode {
+    /// Use eight-bit bus (Set by [with_full_bus][LcdDisplay::with_full_bus])
     EightBits = 0x10, // LCD_8BITMODE
+
+    /// Use four-bit bus (Set by [with_half_bus][LcdDisplay::with_half_bus])
     FourBits = 0x00,  // LCD_4BITMODE
 }
 
 /// Flag for the number of lines in the display 
 #[repr(u8)]
 pub enum Lines {
+    /// Use two lines if available
     TwoLines = 0x08, // LCD_2LINE
+
+    /// Use one line (default)
     OneLine = 0x00,  // LCD_1LINE
 }
 
 /// Flag for the character size of the display
 #[repr(u8)]
 pub enum Size {
+    /// Use display with 5x10 characters
     Dots5x10 = 0x04, // LCD_5x10DOTS
+
+    /// Use display with 5x8 characters (default)
     Dots5x8 = 0x00,  // LCD_5x8DOTS
 }
 
