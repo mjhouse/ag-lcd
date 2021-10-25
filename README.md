@@ -8,7 +8,7 @@
 please add issues to this project so that I can fix them.**
 
 This is a rust port of the [LiquidCrystal](https://github.com/arduino-libraries/LiquidCrystal) library. LiquidCrystal 
-is a standard C++ library that allows developers to control a [HITACHI HD44780](https://pdf1.alldatasheet.com/datasheet-pdf/view/63673/HITACHI/HD44780/+435JWUEGSzDpKdlpzC.hv+/datasheet.pdf) 
+is a standard C++ library that allows developers to control a [HITACHI HD44780](https://pdf1.alldatasheet.com/datasheet-pdf/view/63673/HITACHI/HD44780.html) 
 LCD screen with one or two 16-character lines. Alternatives to this library (that I've investigated) are:
 
 * [lcd](https://crates.io/crates/lcd)
