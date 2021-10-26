@@ -15,22 +15,5 @@ exclude = ["media/*", "references/*"]
 embedded-hal = "0.2.3"
 ufmt = { version = "0.1.0", optional = true }
 
-[dev-dependencies]
-panic-halt = "0.2.0"
-
-[dev-dependencies.arduino-hal]
-git = "https://github.com/rahix/avr-hal"
-rev = "8ad1be6d95b075d13bca611d177a4cc8b9896d77"
-features = ["arduino-nano"]
-
-[profile.dev]
-panic = "abort"
-lto = true
-opt-level = "s"
-
-[profile.release]
-panic = "abort"
-codegen-units = 1
-debug = true
-lto = true
-opt-level = "s"
+[features]
+avr-hal = []
