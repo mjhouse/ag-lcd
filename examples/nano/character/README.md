@@ -1,7 +1,7 @@
 ## Character ([code](src/main.rs))
 
-`cd examples/character && cargo run`
+`cd examples/nano/character && cargo run`
 
 Creates a custom character mapping in the CGRAM on the LCD and displays it (a sideways smiley face)
 
-![Character Example Gif](../../media/character_example.gif)
+![Character Example Gif](/media/nano/character_example.gif)
