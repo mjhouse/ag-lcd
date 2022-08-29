@@ -3,7 +3,7 @@
 All examples assume: 
 
 * A HD44780 two-line LCD screen 
-* An Arduino Nano, except for examples/uno which uses an Arduino Uno
+* An Arduino Nano for examples in directory `nano/`, and an Arduino Uno for examples in directory `uno/`
 * RW pin of the LCD display is connected to GND
 * D4-D7 pins on LCD are connected to Arduino
 * RS and E (Enable) are connected to Arduino
@@ -27,6 +27,6 @@ Pins should be connected as follows (optional pins are commented in examples):
 | d3   | D6       | YES      |
 | d2   | D7       | YES      |
 
-In the case of Arduino Uno, the same connections are to be made, but note that only setups using required pins have been tested to work.
+Note, that in the case of Arduino Uno, only setups using required pins have been tested to work.
 
 These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.  
