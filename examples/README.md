@@ -27,6 +27,6 @@ Pins should be connected as follows (optional pins are commented in examples):
 | d3      | D6       | YES      |
 | d2      | D7       | YES      |
 
-Note, regarding Arduino Uno: only setups using required pins have been tested to work; and users have also reported sometimes have issues with initializing the LCD, which is discussed in [this issue](https://github.com/mjhouse/ag-lcd/issues/4).
+Note, regarding Arduino Uno: only setups using required pins have been tested to work; some users have reported issues with initializing the LCD (see [#4](https://github.com/mjhouse/ag-lcd/issues/4))
 
 These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.  
