@@ -10,6 +10,7 @@ readme = "README.md"
 
 [dependencies]
 arduino-hal = { git = "https://github.com/rahix/avr-hal", rev = "1aacefb335517f85d0de858231e11055d9768cdf", features = ["arduino-uno"] }
+embedded-hal = "0.2.3"
 ag-lcd = { path = "../../../", features = ["avr-hal"] }
 panic-halt = "0.2.0"
 
