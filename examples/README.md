@@ -13,20 +13,20 @@ uncomment lines or otherwise modify these examples to get them to work.
 
 Pins should be connected as follows (optional pins are commented in examples):
 
-| Nano | LCD      | Required |
-|------|----------|----------|
-| d12  | RS       | YES      |
-| d11  | RW       | NO       |
-| d10  | E/Enable | YES      |
-| d9   | D0       | NO       |
-| d8   | D1       | NO       |
-| d7   | D2       | NO       |
-| d6   | D3       | NO       |
-| d5   | D4       | YES      |
-| d4   | D5       | YES      |
-| d3   | D6       | YES      |
-| d2   | D7       | YES      |
+| Arduino | LCD      | Required |
+|---------|----------|----------|
+| d12     | RS       | YES      |
+| d11     | RW       | NO       |
+| d10     | E/Enable | YES      |
+| d9      | D0       | NO       |
+| d8      | D1       | NO       |
+| d7      | D2       | NO       |
+| d6      | D3       | NO       |
+| d5      | D4       | YES      |
+| d4      | D5       | YES      |
+| d3      | D6       | YES      |
+| d2      | D7       | YES      |
 
-Note, that in the case of Arduino Uno, only setups using required pins have been tested to work.
+Note, regarding Arduino Uno: only setups using required pins have been tested to work; some users have reported issues with initializing the LCD (see [#4](https://github.com/mjhouse/ag-lcd/issues/4))
 
 These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.  
