@@ -32,5 +32,5 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_branch: gh-pages
-        publish_dir: ./target/avr-atmega328p/doc
+        publish_dir: ./target/doc
         force_orphan: true
