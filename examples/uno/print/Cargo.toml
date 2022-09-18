@@ -13,11 +13,11 @@ bench = false
 [dependencies]
 panic-halt = "0.2.0"
 embedded-hal = "0.2.3"
-ag-lcd = "0.1.2"
+ag-lcd = { path = "../../../" }
 
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"
-rev = "1aacefb335517f85d0de858231e11055d9768cdf"
+rev = "84af1c72693893449cf93b6a4449df58c57c21e6"
 features = ["arduino-uno"]
 
 # Configure the build for minimal size - AVRs have very little program memory

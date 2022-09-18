@@ -29,4 +29,8 @@ Pins should be connected as follows (optional pins are commented in examples):
 
 Note, that in the case of Arduino Uno, only setups using required pins have been tested to work.
 
-These examples require [ravedude](https://crates.io/crates/ravedude) to be installed. You can do that with `cargo install ravedude`.  
+# Running
+
+* You'll need [ravedude](https://crates.io/crates/ravedude) installed. You can do that by following their installation instructions for your system.
+* Edit the `.cargo/config.toml` file for the example you want to run and add the `--port` argument with the correct device id for your hardware USB cable.
+* Open a terminal in the example directory and run with `cargo run`

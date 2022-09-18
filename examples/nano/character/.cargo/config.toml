@@ -1,8 +1,9 @@
 [build]
 target = "avr-specs/avr-atmega328p.json"
 
+# add something like --port=/dev/ttyUSB0 to target device
 [target.'cfg(target_arch = "avr")']
-runner = "ravedude nano -cb 57600 --port=/dev/ttyUSB1"
+runner = "ravedude nano -cb 57600"
 
 [unstable]
 build-std = ["core"]
