@@ -9,8 +9,8 @@ edition = "2021"
 readme = "README.md"
 
 [dependencies]
-arduino-hal = { git = "https://github.com/rahix/avr-hal", rev = "1aacefb335517f85d0de858231e11055d9768cdf", features = ["arduino-uno"] }
-ag-lcd = { path = "../../../", features = ["avr-hal"] }
+arduino-hal = { git = "https://github.com/rahix/avr-hal", rev = "84af1c72693893449cf93b6a4449df58c57c21e6", features = ["arduino-uno"] }
+ag-lcd = { path = "../../../" }
 panic-halt = "0.2.0"
 
 # Configure the build for minimal size - AVRs have very little program memory

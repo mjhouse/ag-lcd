@@ -5,12 +5,12 @@ authors = ["Michael House <mjhouse@protonmail.com>"]
 description = "An example of the ag-lcd library"
 repository = "https://github.com/mjhouse/ag-lcd"
 license = "GPL-3.0-or-later"
-edition = "2018"
+edition = "2021"
 readme = "README.md"
 
 [dependencies]
-arduino-hal = { git = "https://github.com/rahix/avr-hal", rev = "8ad1be6d95b075d", features = ["arduino-nano"] }
-ag-lcd = { path = "../../../", features = ["avr-hal"] }
+arduino-hal = { git = "https://github.com/rahix/avr-hal", rev = "84af1c72693893449cf93b6a4449df58c57c21e6", features = ["arduino-nano"] }
+ag-lcd = { path = "../../../" }
 panic-halt = "0.2.0"
 
 [profile.dev]
