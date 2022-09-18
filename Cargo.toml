@@ -7,7 +7,7 @@ categories = ["embedded","hardware-support"]
 description = "A rust port of the LiquidCrystal arduino library"
 repository = "https://github.com/mjhouse/ag-lcd"
 license = "GPL-3.0-or-later"
-edition = "2018"
+edition = "2021"
 readme = "README.md"
 exclude = ["media/*", "references/*"]
 
