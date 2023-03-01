@@ -35,4 +35,5 @@ Pins should be connected as follows (optional pins are commented in examples):
 
 # Troubleshooting
 * If your using a Nano board and recieve `avrdude: stk500_getsync() attempt 1 of 10: not in sync: resp=0x00` upon running `cargo run`, it might be because your board was manufactured after January 2018. In that case you'll need the new boot loader, which is achieved by changing `nano` to `nano-new` for `runner` in `.cargo/config.toml` in the example directory.
-* Regarding Arduino Uno: only setups using required pins have been tested to work; some users have reported issues with initializing the LCD (see [#4](https://github.com/mjhouse/ag-lcd/issues/4))
+* Regarding Arduino Uno: only setups using required pins have been tested to work
+* Some users have reported issues with initializing the LCD: try using the builder method `with_reliable_init()`, and see `examples/uno/two_lines/` for an example that implements it (see [#4](https://github.com/mjhouse/ag-lcd/issues/4) for further discussion).

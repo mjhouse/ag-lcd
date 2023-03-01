@@ -405,6 +405,44 @@ where
         self
     }
 
+    /// Increase reliability of initialization of LCD.
+    ///
+    /// Some users experience unreliable initialization of the LCD, where
+    /// the LCD sometimes is unable to display symbols after running
+    /// `.build()`. This method toggles the LCD off and on with some
+    /// delay in between, 3 times. A higher `delay_toggle` tends to make
+    /// this method more reliable, and a value of `10 000` is recommended.
+    /// Note that this method should be run as close as possible to
+    /// `.build()`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
+    ///     .with_half_bus(d4, d5, d6, d7)
+    ///     .with_reliable_init(10000)
+    ///     .build();
+    /// ```
+    pub fn with_reliable_init(mut self, delay_toggle: u16) -> Self {
+        if self.display_ctrl == Display::On as u8 {
+            for _ in 0..3 {
+                self.delay.delay_us(delay_toggle);
+                self.display_off();
+                self.delay.delay_us(delay_toggle);
+                self.display_on();
+            }
+        } else {
+            for _ in 0..3 {
+                self.delay.delay_us(delay_toggle);
+                self.display_on();
+                self.delay.delay_us(delay_toggle);
+                self.display_off();
+            }
+        }
+
+        self
+    }
+
     /// Finish construction of the LcdDisplay and initialized the
     /// display to the provided settings.
     ///
@@ -439,7 +477,7 @@ where
     /// ```
     pub fn build(mut self) -> Self {
         self.delay.delay_us(50000);
-        
+
         self.set(RS, false);
         self.set(EN, false);
 

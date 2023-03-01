@@ -22,6 +22,7 @@ fn main() -> ! {
         .with_half_bus(d4, d5, d6, d7)
         .with_display(Display::On)
         .with_lines(ag_lcd::Lines::TwoLines)
+        .with_reliable_init(10000)
         .build();
 
     lcd.print_two_lines("Hello", "World");
