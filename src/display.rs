@@ -413,20 +413,33 @@ where
     /// delay in between, 3 times. A higher `delay_toggle` tends to make
     /// this method more reliable, and a value of `10 000` is recommended.
     /// Note that this method should be run as close as possible to
-    /// `.build()`, and that it leaves LCD with Display::On.
+    /// `.build()`.
     ///
+    /// # Examples
+    ///
+    /// ```
     /// let mut lcd: LcdDisplay<_,_> = LcdDisplay::new(rs, en, delay)
     ///     .with_half_bus(d4, d5, d6, d7)
     ///     .with_reliable_init(10000)
     ///     .build();
     /// ```
     pub fn with_reliable_init(mut self, delay_toggle: u16) -> Self {
-        for _ in 0..3 {
-            self.delay.delay_us(delay_toggle);
-            self.display_off();
-            self.delay.delay_us(delay_toggle);
-            self.display_on();
+        if self.display_ctrl == Display::On as u8 {
+            for _ in 0..3 {
+                self.delay.delay_us(delay_toggle);
+                self.display_off();
+                self.delay.delay_us(delay_toggle);
+                self.display_on();
+            }
+        } else {
+            for _ in 0..3 {
+                self.delay.delay_us(delay_toggle);
+                self.display_on();
+                self.delay.delay_us(delay_toggle);
+                self.display_off();
+            }
         }
+
         self
     }
 
