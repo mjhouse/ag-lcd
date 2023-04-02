@@ -27,7 +27,7 @@ NOTE: all examples have been updated to use `nightly-2022-07-10` and manually te
 
 ## Usage
 
-```
+```rust
 use ag_lcd::{Display, Blink, Cursor, LcdDisplay};
 
 let peripherals = arduino_hal::Peripherals::take().unwrap();
