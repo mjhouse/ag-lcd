@@ -19,13 +19,6 @@ complicated to use. This library uses traits from [embedded-hal](https://crates.
 with any hardware abstraction layer that uses the same types. Currently this crate has only been tested with [avr-hal](https://github.com/Rahix/avr-hal)
 and all example code and comments assume you're using avr-hal as well.
 
-## Building
-
-You'll need to use nightly to compile this project- currently there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) 
-in avr-hal that requires nightly-2021-01-07 or older.
-
-NOTE: all examples have been updated to use `nightly-2022-07-10` and manually tested to make sure that they build. Please file an issue if you find that they don't.
-
 ## Usage
 
 ```
