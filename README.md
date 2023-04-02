@@ -21,8 +21,7 @@ and all example code and comments assume you're using avr-hal as well.
 
 ## Building
 
-You'll need to use nightly to compile this project- currently there is an issue ([#124](https://github.com/Rahix/avr-hal/issues/124)) 
-in avr-hal that requires nightly-2021-01-07 or older.
+You'll need to use nightly to compile this project because avr-hal requires nightly-2021-01-07 or older.
 
 NOTE: all examples have been updated to use `nightly-2022-07-10` and manually tested to make sure that they build. Please file an issue if you find that they don't.
 
