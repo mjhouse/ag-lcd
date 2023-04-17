@@ -4,10 +4,7 @@ use core::{
     fmt::Debug,
     ops::{Deref, DerefMut},
 };
-use embedded_hal::{
-    blocking::delay::DelayUs,
-    digital::{v1_compat::OldOutputPin, v2::OutputPin},
-};
+use embedded_hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
 use port_expander::{dev::pcf8574, mode::QuasiBidirectional, I2cBus, Pcf8574a, Pin};
 use shared_bus::{BusMutex, NullMutex};
 
@@ -64,14 +61,15 @@ where
         let mut expander = Pcf8574a::with_mutex(i2c, a0, a1, a2);
         let pcf8574::Parts {
             p0,
-            p1,
+            mut p1,
             p2,
-            p3,
+            p3: _,
             p4,
             p5,
             p6,
             p7,
         } = expander.split();
+        p1.set_low();
         let lcd = LcdDisplay::new(
             InfallibleOutputPin::new(p0),
             InfallibleOutputPin::new(p2),
@@ -103,14 +101,15 @@ where
         let mut expander = Pcf8574a::new(i2c, a0, a1, a2);
         let pcf8574::Parts {
             p0,
-            p1,
+            mut p1,
             p2,
-            p3,
+            p3: _,
             p4,
             p5,
             p6,
             p7,
         } = expander.split();
+        p1.set_low();
         let lcd = LcdDisplay::new(
             InfallibleOutputPin::new(p0),
             InfallibleOutputPin::new(p2),
