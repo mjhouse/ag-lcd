@@ -46,7 +46,7 @@ where
     T: OutputPin<Error = Infallible> + Sized,
     D: DelayUs<u16> + Sized,
 {
-    lcd: LcdDisplay<T, D>,
+    lcd: Option<LcdDisplay<T, D>>,
     expander: E,
 }
 
@@ -58,7 +58,11 @@ where
     <I2C as I2cBus>::BusError: Debug,
 {
     pub fn new_pcf8574a_with_mutex(i2c: I2C, a0: bool, a1: bool, a2: bool, delay: D) -> Self {
-        let mut expander = Pcf8574a::with_mutex(i2c, a0, a1, a2);
+        let expander = Pcf8574a::with_mutex(i2c, a0, a1, a2);
+        let mut res = Self {
+            lcd: None,
+            expander,
+        };
         let pcf8574::Parts {
             p0,
             mut p1,
@@ -68,7 +72,7 @@ where
             p5,
             p6,
             p7,
-        } = expander.split();
+        } = res.expander.split();
         p1.set_low();
         let lcd = LcdDisplay::new(
             InfallibleOutputPin::new(p0),
@@ -82,7 +86,8 @@ where
             InfallibleOutputPin::new(p7),
         )
         .build();
-        Self { lcd, expander }
+        res.lcd = Some(lcd);
+        res
     }
 }
 
@@ -98,7 +103,11 @@ where
     <I2C as I2cBus>::BusError: Debug,
 {
     pub fn new_pcf8574a(i2c: I2C, a0: bool, a1: bool, a2: bool, delay: D) -> Self {
-        let mut expander = Pcf8574a::new(i2c, a0, a1, a2);
+        let expander = Pcf8574a::new(i2c, a0, a1, a2);
+        let mut res = Self {
+            lcd: None,
+            expander,
+        };
         let pcf8574::Parts {
             p0,
             mut p1,
@@ -108,7 +117,7 @@ where
             p5,
             p6,
             p7,
-        } = expander.split();
+        } = res.expander.split();
         p1.set_low();
         let lcd = LcdDisplay::new(
             InfallibleOutputPin::new(p0),
@@ -122,7 +131,8 @@ where
             InfallibleOutputPin::new(p7),
         )
         .build();
-        Self { lcd, expander }
+        res.lcd = Some(lcd);
+        res
     }
 }
 
@@ -134,7 +144,7 @@ where
     type Target = LcdDisplay<T, D>;
 
     fn deref(&self) -> &Self::Target {
-        &self.lcd
+        self.lcd.as_ref().unwrap()
     }
 }
 
@@ -144,6 +154,6 @@ where
     D: DelayUs<u16> + Sized,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.lcd
+        self.lcd.as_mut().unwrap()
     }
 }
