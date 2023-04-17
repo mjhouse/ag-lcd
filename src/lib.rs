@@ -66,6 +66,7 @@
 
 mod display;
 mod errors;
+mod i2c;
 
 pub use display::*;
 pub use errors::Error;
