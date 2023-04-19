@@ -11,7 +11,7 @@ use shared_bus::{BusMutex, NullMutex};
 
 /// Custom version of OldOutputPin that implements v2::OutputPin
 /// Used to convert pin with fallible error to infallible
-struct InfallibleOutputPin<T> {
+pub struct InfallibleOutputPin<T> {
     pin: T,
 }
 
