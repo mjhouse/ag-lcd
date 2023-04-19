@@ -1,5 +1,6 @@
 use crate::LcdDisplay;
 use core::{
+    cell::RefCell,
     convert::Infallible,
     fmt::Debug,
     ops::{Deref, DerefMut},
@@ -32,11 +33,13 @@ where
     type Error = Infallible;
 
     fn set_low(&mut self) -> Result<(), Self::Error> {
-        Ok(self.pin.set_low().unwrap())
+        let _ = self.pin.set_low();
+        Ok(())
     }
 
     fn set_high(&mut self) -> Result<(), Self::Error> {
-        Ok(self.pin.set_high().unwrap())
+        let _ = self.pin.set_high();
+        Ok(())
     }
 }
 
@@ -46,23 +49,27 @@ where
     T: OutputPin<Error = Infallible> + Sized,
     D: DelayUs<u16> + Sized,
 {
-    lcd: Option<LcdDisplay<T, D>>,
+    lcd: Option<RefCell<LcdDisplay<T, D>>>,
     expander: E,
 }
 
-impl<D, M, I2C> I2CLcdDisplay<InfallibleOutputPin<Pin<'_, QuasiBidirectional, M>>, D, Pcf8574a<M>>
+impl<'a: 'b, 'b, D, M, I2C>
+    I2CLcdDisplay<InfallibleOutputPin<Pin<'b, QuasiBidirectional, M>>, D, Pcf8574a<M>>
 where
     D: DelayUs<u16> + Sized,
     M: BusMutex<Bus = pcf8574::Driver<I2C>>,
     I2C: I2cBus,
     <I2C as I2cBus>::BusError: Debug,
 {
-    pub fn new_pcf8574a_with_mutex(i2c: I2C, a0: bool, a1: bool, a2: bool, delay: D) -> Self {
+    pub fn new_pcf8574a_with_mutex(i2c: I2C, a0: bool, a1: bool, a2: bool) -> Self {
         let expander = Pcf8574a::with_mutex(i2c, a0, a1, a2);
-        let mut res = Self {
+        Self {
             lcd: None,
             expander,
-        };
+        }
+    }
+
+    pub fn init_lcd(&'a mut self, delay: D) {
         let pcf8574::Parts {
             p0,
             mut p1,
@@ -72,8 +79,8 @@ where
             p5,
             p6,
             p7,
-        } = res.expander.split();
-        p1.set_low();
+        } = self.expander.split();
+        let _ = p1.set_low();
         let lcd = LcdDisplay::new(
             InfallibleOutputPin::new(p0),
             InfallibleOutputPin::new(p2),
@@ -84,10 +91,8 @@ where
             InfallibleOutputPin::new(p5),
             InfallibleOutputPin::new(p6),
             InfallibleOutputPin::new(p7),
-        )
-        .build();
-        res.lcd = Some(lcd);
-        res
+        );
+        self.lcd = Some(RefCell::new(lcd));
     }
 }
 
@@ -102,37 +107,12 @@ where
     I2C: I2cBus,
     <I2C as I2cBus>::BusError: Debug,
 {
-    pub fn new_pcf8574a(i2c: I2C, a0: bool, a1: bool, a2: bool, delay: D) -> Self {
+    pub fn new_pcf8574a(i2c: I2C, a0: bool, a1: bool, a2: bool) -> Self {
         let expander = Pcf8574a::new(i2c, a0, a1, a2);
-        let mut res = Self {
-            lcd: None,
+        Self {
             expander,
-        };
-        let pcf8574::Parts {
-            p0,
-            mut p1,
-            p2,
-            p3: _,
-            p4,
-            p5,
-            p6,
-            p7,
-        } = res.expander.split();
-        p1.set_low();
-        let lcd = LcdDisplay::new(
-            InfallibleOutputPin::new(p0),
-            InfallibleOutputPin::new(p2),
-            delay,
-        )
-        .with_half_bus(
-            InfallibleOutputPin::new(p4),
-            InfallibleOutputPin::new(p5),
-            InfallibleOutputPin::new(p6),
-            InfallibleOutputPin::new(p7),
-        )
-        .build();
-        res.lcd = Some(lcd);
-        res
+            lcd: None,
+        }
     }
 }
 
@@ -144,7 +124,17 @@ where
     type Target = LcdDisplay<T, D>;
 
     fn deref(&self) -> &Self::Target {
-        self.lcd.as_ref().unwrap()
+        #[allow(unsafe_code)]
+        if let Some(lcd_refcell) = self.lcd.as_ref() {
+            unsafe {
+                match lcd_refcell.try_borrow_unguarded() {
+                    Ok(res) => res,
+                    Err(e) => panic!("Failed to borrow unguarded: {}", e),
+                }
+            }
+        } else {
+            panic!("Tried to deref before init_lcd")
+        }
     }
 }
 
@@ -154,6 +144,10 @@ where
     D: DelayUs<u16> + Sized,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.lcd.as_mut().unwrap()
+        if let Some(lcd_refcell) = self.lcd.as_mut() {
+            lcd_refcell.get_mut()
+        } else {
+            panic!("Tried to deref mut before init_lcd")
+        }
     }
 }
