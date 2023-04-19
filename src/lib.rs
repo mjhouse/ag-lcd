@@ -66,7 +66,8 @@
 
 mod display;
 mod errors;
-mod i2c;
+/// Allows interacting  with an lcd display via I2C using a digital port expander
+pub mod i2c;
 
 pub use display::*;
 pub use errors::Error;

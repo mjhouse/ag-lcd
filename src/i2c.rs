@@ -61,6 +61,8 @@ where
     I2C: I2cBus,
     <I2C as I2cBus>::BusError: Debug,
 {
+    /// Creates a new [`I2CLcdDisplay`] using PCF8572A for interfacing and selected mutex
+    /// [`init_lcd`] must be called after before any otehr use
     pub fn new_pcf8574a_with_mutex(i2c: I2C, a0: bool, a1: bool, a2: bool) -> Self {
         let expander = Pcf8574a::with_mutex(i2c, a0, a1, a2);
         Self {
@@ -69,6 +71,7 @@ where
         }
     }
 
+    /// Initializes lcd, no lcd methods should be used before a call to this method!
     pub fn init_lcd(&'a mut self, delay: D) {
         let pcf8574::Parts {
             p0,
@@ -107,6 +110,8 @@ where
     I2C: I2cBus,
     <I2C as I2cBus>::BusError: Debug,
 {
+    /// Creates a new [`I2CLcdDisplay`] using PCF8572A for interfacing and default mutex
+    /// [`init_lcd`] must be called after before any otehr use
     pub fn new_pcf8574a(i2c: I2C, a0: bool, a1: bool, a2: bool) -> Self {
         let expander = Pcf8574a::new(i2c, a0, a1, a2);
         Self {
