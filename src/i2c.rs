@@ -1,13 +1,8 @@
 use crate::LcdDisplay;
-use core::{
-    cell::RefCell,
-    convert::Infallible,
-    fmt::Debug,
-    ops::{Deref, DerefMut},
-};
+use core::{convert::Infallible, fmt::Debug};
 use embedded_hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
-use port_expander::{dev::pcf8574, mode::QuasiBidirectional, I2cBus, Pcf8574a, Pin};
-use shared_bus::{BusMutex, NullMutex};
+use port_expander::{dev::pcf8574, mode::QuasiBidirectional, I2cBus, Pcf8574, Pcf8574a, Pin};
+use shared_bus::BusMutex;
 
 /// Custom version of OldOutputPin that implements v2::OutputPin
 /// Used to convert pin with fallible error to infallible
@@ -43,36 +38,15 @@ where
     }
 }
 
-/// Uses port expander, like PCF8574, to communicate with display
-pub struct I2CLcdDisplay<T, D, E>
-where
-    T: OutputPin<Error = Infallible> + Sized,
-    D: DelayUs<u16> + Sized,
-{
-    lcd: Option<RefCell<LcdDisplay<T, D>>>,
-    expander: E,
-}
-
-impl<'a: 'b, 'b, D, M, I2C>
-    I2CLcdDisplay<InfallibleOutputPin<Pin<'b, QuasiBidirectional, M>>, D, Pcf8574a<M>>
+impl<'a, D, M, I2C> LcdDisplay<InfallibleOutputPin<Pin<'a, QuasiBidirectional, M>>, D>
 where
     D: DelayUs<u16> + Sized,
     M: BusMutex<Bus = pcf8574::Driver<I2C>>,
     I2C: I2cBus,
     <I2C as I2cBus>::BusError: Debug,
 {
-    /// Creates a new [`I2CLcdDisplay`] using PCF8572A for interfacing and selected mutex
-    /// [`init_lcd`] must be called after before any otehr use
-    pub fn new_pcf8574a_with_mutex(i2c: I2C, a0: bool, a1: bool, a2: bool) -> Self {
-        let expander = Pcf8574a::with_mutex(i2c, a0, a1, a2);
-        Self {
-            lcd: None,
-            expander,
-        }
-    }
-
-    /// Initializes lcd, no lcd methods should be used before a call to this method!
-    pub fn init_lcd(&'a mut self, delay: D) {
+    /// Creates a new [`LcdDisplay`] using PCF8572A for interfacing
+    pub fn new_pcf8574a(expander: &'a mut Pcf8574a<M>, delay: D) -> Self {
         let pcf8574::Parts {
             p0,
             mut p1,
@@ -82,9 +56,9 @@ where
             p5,
             p6,
             p7,
-        } = self.expander.split();
+        } = expander.split();
         let _ = p1.set_low();
-        let lcd = LcdDisplay::new(
+        LcdDisplay::new(
             InfallibleOutputPin::new(p0),
             InfallibleOutputPin::new(p2),
             delay,
@@ -94,65 +68,32 @@ where
             InfallibleOutputPin::new(p5),
             InfallibleOutputPin::new(p6),
             InfallibleOutputPin::new(p7),
-        );
-        self.lcd = Some(RefCell::new(lcd));
+        )
     }
-}
 
-impl<D, I2C>
-    I2CLcdDisplay<
-        InfallibleOutputPin<Pin<'_, QuasiBidirectional, NullMutex<pcf8574::Driver<I2C>>>>,
-        D,
-        Pcf8574a<NullMutex<pcf8574::Driver<I2C>>>,
-    >
-where
-    D: DelayUs<u16> + Sized,
-    I2C: I2cBus,
-    <I2C as I2cBus>::BusError: Debug,
-{
-    /// Creates a new [`I2CLcdDisplay`] using PCF8572A for interfacing and default mutex
-    /// [`init_lcd`] must be called after before any otehr use
-    pub fn new_pcf8574a(i2c: I2C, a0: bool, a1: bool, a2: bool) -> Self {
-        let expander = Pcf8574a::new(i2c, a0, a1, a2);
-        Self {
-            expander,
-            lcd: None,
-        }
-    }
-}
-
-impl<T, D, E> Deref for I2CLcdDisplay<T, D, E>
-where
-    T: OutputPin<Error = Infallible> + Sized,
-    D: DelayUs<u16> + Sized,
-{
-    type Target = LcdDisplay<T, D>;
-
-    fn deref(&self) -> &Self::Target {
-        #[allow(unsafe_code)]
-        if let Some(lcd_refcell) = self.lcd.as_ref() {
-            unsafe {
-                match lcd_refcell.try_borrow_unguarded() {
-                    Ok(res) => res,
-                    Err(e) => panic!("Failed to borrow unguarded: {}", e),
-                }
-            }
-        } else {
-            panic!("Tried to deref before init_lcd")
-        }
-    }
-}
-
-impl<T, D, E> DerefMut for I2CLcdDisplay<T, D, E>
-where
-    T: OutputPin<Error = Infallible> + Sized,
-    D: DelayUs<u16> + Sized,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        if let Some(lcd_refcell) = self.lcd.as_mut() {
-            lcd_refcell.get_mut()
-        } else {
-            panic!("Tried to deref mut before init_lcd")
-        }
+    /// Creates a new [`LcdDisplay`] using PCF8572 for interfacing
+    pub fn new_pcf8574(expander: &'a mut Pcf8574<M>, delay: D) -> Self {
+        let pcf8574::Parts {
+            p0,
+            mut p1,
+            p2,
+            p3: _,
+            p4,
+            p5,
+            p6,
+            p7,
+        } = expander.split();
+        let _ = p1.set_low();
+        LcdDisplay::new(
+            InfallibleOutputPin::new(p0),
+            InfallibleOutputPin::new(p2),
+            delay,
+        )
+        .with_half_bus(
+            InfallibleOutputPin::new(p4),
+            InfallibleOutputPin::new(p5),
+            InfallibleOutputPin::new(p6),
+            InfallibleOutputPin::new(p7),
+        )
     }
 }
