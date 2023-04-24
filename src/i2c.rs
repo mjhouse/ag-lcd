@@ -48,7 +48,7 @@ where
     fn from_parts(parts: pcf8574::Parts<'a, I2C, M>, delay: D) -> Self {
         let pcf8574::Parts {
             p0,
-            mut p1,
+            p1,
             p2,
             p3: _,
             p4,
@@ -56,12 +56,12 @@ where
             p6,
             p7,
         } = parts;
-        let _ = p1.set_low();
         LcdDisplay::new(
             InfallibleOutputPin::new(p0),
             InfallibleOutputPin::new(p2),
             delay,
         )
+        .with_rw(InfallibleOutputPin::new(p1))
         .with_half_bus(
             InfallibleOutputPin::new(p4),
             InfallibleOutputPin::new(p5),
