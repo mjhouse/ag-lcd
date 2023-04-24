@@ -71,11 +71,13 @@ where
     }
 
     /// Creates a new [`LcdDisplay`] using PCF8572A for interfacing
+    #[inline]
     pub fn new_pcf8574a(expander: &'a mut Pcf8574a<M>, delay: D) -> Self {
         Self::from_parts(expander.split(), delay)
     }
 
     /// Creates a new [`LcdDisplay`] using PCF8572 for interfacing
+    #[inline]
     pub fn new_pcf8574(expander: &'a mut Pcf8574<M>, delay: D) -> Self {
         Self::from_parts(expander.split(), delay)
     }
