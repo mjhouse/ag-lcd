@@ -997,9 +997,9 @@ where
         if (self.display_func & Lines::TwoLines as u8) == 0 {
             Lines::OneLine
         } else if (self.display_func & Lines::FourLines as u8) == 0 {
-            Lines::FourLines
-        } else {
             Lines::TwoLines
+        } else {
+            Lines::OneLine
         }
     }
 
