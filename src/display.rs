@@ -96,6 +96,9 @@ pub enum Mode {
 /// Flag for the number of lines in the display
 #[repr(u8)]
 pub enum Lines {
+    /// Use four lines if available
+    FourLines = 0x0C, // LCD_2LINE but unused font size bit is used to differentiate from two lines mode,
+
     /// Use two lines if available
     TwoLines = 0x08, // LCD_2LINE
 
@@ -304,6 +307,7 @@ where
     /// ```
     pub fn with_lines(mut self, value: Lines) -> Self {
         match value {
+            Lines::FourLines => self.display_func |= Lines::FourLines as u8,
             Lines::TwoLines => self.display_func |= Lines::TwoLines as u8,
             Lines::OneLine => self.display_func &= !(Lines::TwoLines as u8),
         }
@@ -551,6 +555,7 @@ where
         let max_lines = 4;
 
         let num_lines = match self.lines() {
+            Lines::FourLines => 2,
             Lines::TwoLines => 2,
             Lines::OneLine => 1,
         };
@@ -991,6 +996,8 @@ where
     pub fn lines(&self) -> Lines {
         if (self.display_func & Lines::TwoLines as u8) == 0 {
             Lines::OneLine
+        } else if (self.display_func & Lines::FourLines as u8) == 0 {
+            Lines::FourLines
         } else {
             Lines::TwoLines
         }
