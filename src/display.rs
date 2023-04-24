@@ -539,6 +539,18 @@ where
         self
     }
 
+    /// Turn backlight on
+    #[cfg(feature = "i2c")]
+    pub fn backlight_on(&mut self) {
+        let _ = self.backlight_pin.set_high();
+    }
+
+    /// Turn backlight off
+    #[cfg(feature = "i2c")]
+    pub fn backlight_off(&mut self) {
+        let _ = self.backlight_pin.set_low();
+    }
+
     /// Set the position of the cursor.
     ///
     /// # Examples
