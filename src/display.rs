@@ -97,7 +97,7 @@ pub enum Mode {
 #[repr(u8)]
 pub enum Lines {
     /// Use four lines if available
-    FourLines = 0x0C, // LCD_2LINE but unused font size bit is used to differentiate from two lines mode,
+    FourLines = 0x0C, // LCD_2LINE but unused font size bit is used to differentiate from two lines mode
 
     /// Use two lines if available
     TwoLines = 0x08, // LCD_2LINE
