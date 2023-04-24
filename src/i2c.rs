@@ -50,7 +50,7 @@ where
             p0,
             p1,
             p2,
-            p3: _,
+            p3,
             p4,
             p5,
             p6,
@@ -60,6 +60,7 @@ where
             InfallibleOutputPin::new(p0),
             InfallibleOutputPin::new(p2),
             delay,
+            InfallibleOutputPin::new(p3),
         )
         .with_rw(InfallibleOutputPin::new(p1))
         .with_half_bus(

@@ -141,6 +141,8 @@ where
     T: OutputPin<Error = Infallible> + Sized,
     D: DelayUs<u16> + Sized,
 {
+    #[cfg(feature = "i2c")]
+    backlight_pin: T,
     pins: [Option<T>; 11],
     display_func: u8,
     display_mode: u8,
@@ -179,7 +181,7 @@ where
     ///     .with_rw(d10) // optional (set lcd pin to GND if not provided)
     ///     .build();
     /// ```
-    pub fn new(rs: T, en: T, delay: D) -> Self {
+    pub fn new(rs: T, en: T, delay: D, #[cfg(feature = "i2c")] backlight_pin: T) -> Self {
         Self {
             pins: [
                 Some(rs),
@@ -194,6 +196,8 @@ where
                 None,
                 None,
             ],
+            #[cfg(feature = "i2c")]
+            backlight_pin,
             display_func: DEFAULT_DISPLAY_FUNC,
             display_mode: DEFAULT_DISPLAY_MODE,
             display_ctrl: DEFAULT_DISPLAY_CTRL,
