@@ -183,6 +183,7 @@ where
     ///     .build();
     /// ```
     pub fn new(rs: T, en: T, delay: D) -> Self {
+        let cols: u8 = 16;
         Self {
             pins: [
                 Some(rs),
@@ -200,10 +201,19 @@ where
             display_func: DEFAULT_DISPLAY_FUNC,
             display_mode: DEFAULT_DISPLAY_MODE,
             display_ctrl: DEFAULT_DISPLAY_CTRL,
-            offsets: [0, 0, 0, 0],
+            offsets: [0x00, 0x40, 0x00 + cols, 0x40 + cols],
             delay: delay,
             code: Error::None,
         }
+    }
+
+    /// Set amount of columns this lcd has
+    pub fn with_cols(mut self, mut cols: u8) -> Self {
+        cols = cols.clamp(0, 31);
+        // First two bytes skipped because they are always the same
+        self.offsets[2] = 0x00 + cols;
+        self.offsets[3] = 0x40 + cols;
+        self
     }
 
     /// Set four pins that connect to the lcd screen and configure the display for four-pin mode.
@@ -488,13 +498,6 @@ where
         if self.exists(RW) {
             self.set(RW, false);
         }
-
-        let cols: u8 = 16;
-
-        self.offsets[0] = 0x00;
-        self.offsets[1] = 0x40;
-        self.offsets[2] = 0x00 + cols;
-        self.offsets[3] = 0x40 + cols;
 
         match self.mode() {
             Mode::FourBits => {
