@@ -45,8 +45,7 @@ where
     I2C: I2cBus,
     <I2C as I2cBus>::BusError: Debug,
 {
-    /// Creates a new [`LcdDisplay`] using PCF8572A for interfacing
-    pub fn new_pcf8574a(expander: &'a mut Pcf8574a<M>, delay: D) -> Self {
+    fn from_parts(parts: pcf8574::Parts<'a, I2C, M>, delay: D) -> Self {
         let pcf8574::Parts {
             p0,
             mut p1,
@@ -56,7 +55,7 @@ where
             p5,
             p6,
             p7,
-        } = expander.split();
+        } = parts;
         let _ = p1.set_low();
         LcdDisplay::new(
             InfallibleOutputPin::new(p0),
@@ -71,29 +70,13 @@ where
         )
     }
 
+    /// Creates a new [`LcdDisplay`] using PCF8572A for interfacing
+    pub fn new_pcf8574a(expander: &'a mut Pcf8574a<M>, delay: D) -> Self {
+        Self::from_parts(expander.split(), delay)
+    }
+
     /// Creates a new [`LcdDisplay`] using PCF8572 for interfacing
     pub fn new_pcf8574(expander: &'a mut Pcf8574<M>, delay: D) -> Self {
-        let pcf8574::Parts {
-            p0,
-            mut p1,
-            p2,
-            p3: _,
-            p4,
-            p5,
-            p6,
-            p7,
-        } = expander.split();
-        let _ = p1.set_low();
-        LcdDisplay::new(
-            InfallibleOutputPin::new(p0),
-            InfallibleOutputPin::new(p2),
-            delay,
-        )
-        .with_half_bus(
-            InfallibleOutputPin::new(p4),
-            InfallibleOutputPin::new(p5),
-            InfallibleOutputPin::new(p6),
-            InfallibleOutputPin::new(p7),
-        )
+        Self::from_parts(expander.split(), delay)
     }
 }
