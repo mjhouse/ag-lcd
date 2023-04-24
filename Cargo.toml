@@ -14,8 +14,9 @@ exclude = ["media/*", "references/*"]
 [dependencies]
 embedded-hal = "0.2.3"
 ufmt = { version = "0.1.0", optional = true }
-port-expander = { version = "0.3" }
+port-expander = { version = "0.3", optional = true }
 shared-bus = "0.2"
 
 [features]
 avr-hal = []
+i2c = ["port-expander"]
