@@ -555,7 +555,7 @@ where
         let max_lines = 4;
 
         let num_lines = match self.lines() {
-            Lines::FourLines => 2,
+            Lines::FourLines => 4,
             Lines::TwoLines => 2,
             Lines::OneLine => 1,
         };
