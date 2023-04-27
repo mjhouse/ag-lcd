@@ -22,6 +22,7 @@ where
     }
 }
 
+/// Wrapper struct to make output pins infallible
 impl<T, E> OutputPin for InfallibleOutputPin<T>
 where
     T: OutputPin<Error = E>,
@@ -29,11 +30,13 @@ where
 {
     type Error = Infallible;
 
+    /// Set this output pin to low
     fn set_low(&mut self) -> Result<(), Self::Error> {
         let _ = self.pin.set_low();
         Ok(())
     }
 
+    /// Set this output pin to high
     fn set_high(&mut self) -> Result<(), Self::Error> {
         let _ = self.pin.set_high();
         Ok(())
