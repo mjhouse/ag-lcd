@@ -60,8 +60,8 @@ where
             InfallibleOutputPin::new(p0),
             InfallibleOutputPin::new(p2),
             delay,
-            InfallibleOutputPin::new(p3),
         )
+        .with_backlight(InfallibleOutputPin::new(p3))
         .with_rw(InfallibleOutputPin::new(p1))
         .with_half_bus(
             InfallibleOutputPin::new(p4),
