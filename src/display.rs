@@ -124,6 +124,9 @@ pub enum Size {
     Dots5x8 = 0x00, // LCD_5x8DOTS
 }
 
+/// One of the most popular sizes for this kind of LCD is 16x2
+const DEFAULT_COLS: u8 = 16;
+
 const DEFAULT_DISPLAY_FUNC: u8 = Mode::FourBits as u8 | Lines::OneLine as u8 | Size::Dots5x8 as u8;
 const DEFAULT_DISPLAY_CTRL: u8 = Display::On as u8 | Cursor::Off as u8 | Blink::Off as u8;
 const DEFAULT_DISPLAY_MODE: u8 = Layout::LeftToRight as u8 | AutoScroll::Off as u8;
@@ -191,7 +194,6 @@ where
     ///     .build();
     /// ```
     pub fn new(rs: T, en: T, delay: D) -> Self {
-        let cols: u8 = 16;
         Self {
             pins: [
                 Some(rs),
@@ -209,7 +211,7 @@ where
             display_func: DEFAULT_DISPLAY_FUNC,
             display_mode: DEFAULT_DISPLAY_MODE,
             display_ctrl: DEFAULT_DISPLAY_CTRL,
-            offsets: [0x00, 0x40, 0x00 + cols, 0x40 + cols],
+            offsets: [0x00, 0x40, 0x00 + DEFAULT_COLS, 0x40 + DEFAULT_COLS],
             delay: delay,
             code: Error::None,
         }
