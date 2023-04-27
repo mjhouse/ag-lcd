@@ -66,7 +66,6 @@
 
 mod display;
 mod errors;
-/// Allows interacting  with an lcd display via I2C using a digital port expander
 #[cfg(feature = "i2c")]
 pub mod i2c;
 

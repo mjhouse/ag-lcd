@@ -1,3 +1,5 @@
+//! Allows interacting  with an lcd display via I2C using a digital port expander
+
 use crate::LcdDisplay;
 use core::{convert::Infallible, fmt::Debug};
 use embedded_hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
