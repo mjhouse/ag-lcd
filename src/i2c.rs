@@ -51,7 +51,7 @@ where
     <I2C as I2cBus>::BusError: Debug,
 {
     /// Descructs pin collection from port expander and constructs LcdDisplay using pins that are
-    /// available.
+    /// available. For example usage see [`new_pcf8574`] or [`new_pcf8574a`].
     fn from_parts(parts: pcf8574::Parts<'a, I2C, M>, delay: D) -> Self {
         let pcf8574::Parts {
             p0,
