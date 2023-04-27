@@ -73,6 +73,15 @@ pub enum Blink {
     Off = 0x00, // LCD_BLINKOFF
 }
 
+/// Flag that sets backlight state
+pub enum Backlight {
+    /// Turn Backlight on (default)
+    On,
+
+    /// Turn Backlight off
+    Off,
+}
+
 /// Flag used to indicate direction for display scrolling
 #[repr(u8)]
 pub enum Scroll {
@@ -668,6 +677,14 @@ where
         }
         self.command(Command::SetDisplayCtrl as u8 | self.display_ctrl);
         self.delay.delay_us(CMD_DELAY);
+    }
+
+    /// Enable or disable LCD backlight
+    pub fn set_backlight(&mut self, backlight: Backlight) {
+        match backlight {
+            Backlight::On => self.blink_on(),
+            Backlight::Off => self.blink_off(),
+        }
     }
 
     /// Turn auto scroll on or off.
