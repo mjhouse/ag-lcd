@@ -1007,12 +1007,13 @@ where
     /// let lines = lcd.lines();
     /// ```
     pub fn lines(&self) -> Lines {
-        if (self.display_func & Lines::TwoLines as u8) == 0 {
-            Lines::OneLine
-        } else if (self.display_func & Lines::FourLines as u8) == 0 {
+        let flag_bits: u8 = self.display_func & 0x0C;
+        if flag_bits == Lines::FourLines as u8 {
+            Lines::FourLines
+        } else if flag_bits == Lines::TwoLines as u8 {
             Lines::TwoLines
         } else {
-            Lines::FourLines
+            Lines::OneLine
         }
     }
 
