@@ -17,12 +17,12 @@ where
     T: OutputPin<Error = E>,
     E: Debug,
 {
+    /// Wraps any OutputPin to make a struct implementing OutputPin<Error=Infallible>
     fn new(pin: T) -> Self {
         Self { pin }
     }
 }
 
-/// Wrapper struct to make output pins infallible
 impl<T, E> OutputPin for InfallibleOutputPin<T>
 where
     T: OutputPin<Error = E>,
