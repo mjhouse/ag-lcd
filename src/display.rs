@@ -97,7 +97,15 @@ pub enum Mode {
 #[repr(u8)]
 pub enum Lines {
     /// Use four lines if available
-    FourLines = 0x0C, // LCD_2LINE but unused font size bit is used to differentiate from two lines mode
+    ///
+    /// ## Notes
+    /// Since HD44780 doesn't support 4-line LCDs, 4-line display is used like a 2-line display,
+    /// but half of the characters were moved below the top part. Since the interface only allows
+    /// two states for amount of lines: two and one, a way to differentiate between four line and
+    /// two line mode is needed. According to HHD44780 documentation, when two-line display mode is
+    /// used, the bit that specifies font size is ignored. Because of that, we can use it to
+    /// differentiate between four line mode and two line mode.
+    FourLines = 0x0C,
 
     /// Use two lines if available
     TwoLines = 0x08, // LCD_2LINE
