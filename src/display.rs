@@ -96,6 +96,17 @@ pub enum Mode {
 /// Flag for the number of lines in the display
 #[repr(u8)]
 pub enum Lines {
+    /// Use four lines if available
+    ///
+    /// ## Notes
+    /// Since HD44780 doesn't support 4-line LCDs, 4-line display is used like a 2-line display,
+    /// but half of the characters were moved below the top part. Since the interface only allows
+    /// two states for amount of lines: two and one, a way to differentiate between four line and
+    /// two line mode is needed. According to HHD44780 documentation, when two-line display mode is
+    /// used, the bit that specifies font size is ignored. Because of that, we can use it to
+    /// differentiate between four line mode and two line mode.
+    FourLines = 0x0C,
+
     /// Use two lines if available
     TwoLines = 0x08, // LCD_2LINE
 
@@ -112,6 +123,9 @@ pub enum Size {
     /// Use display with 5x8 characters (default)
     Dots5x8 = 0x00, // LCD_5x8DOTS
 }
+
+/// One of the most popular sizes for this kind of LCD is 16x2
+const DEFAULT_COLS: u8 = 16;
 
 const DEFAULT_DISPLAY_FUNC: u8 = Mode::FourBits as u8 | Lines::OneLine as u8 | Size::Dots5x8 as u8;
 const DEFAULT_DISPLAY_CTRL: u8 = Display::On as u8 | Cursor::Off as u8 | Blink::Off as u8;
@@ -197,10 +211,19 @@ where
             display_func: DEFAULT_DISPLAY_FUNC,
             display_mode: DEFAULT_DISPLAY_MODE,
             display_ctrl: DEFAULT_DISPLAY_CTRL,
-            offsets: [0, 0, 0, 0],
+            offsets: [0x00, 0x40, 0x00 + DEFAULT_COLS, 0x40 + DEFAULT_COLS],
             delay: delay,
             code: Error::None,
         }
+    }
+
+    /// Set amount of columns this lcd has
+    pub fn with_cols(mut self, mut cols: u8) -> Self {
+        cols = cols.clamp(0, 31);
+        // First two bytes skipped because they are always the same
+        self.offsets[2] = 0x00 + cols;
+        self.offsets[3] = 0x40 + cols;
+        self
     }
 
     /// Set four pins that connect to the lcd screen and configure the display for four-pin mode.
@@ -304,6 +327,7 @@ where
     /// ```
     pub fn with_lines(mut self, value: Lines) -> Self {
         match value {
+            Lines::FourLines => self.display_func |= Lines::FourLines as u8,
             Lines::TwoLines => self.display_func |= Lines::TwoLines as u8,
             Lines::OneLine => self.display_func &= !(Lines::TwoLines as u8),
         }
@@ -485,13 +509,6 @@ where
             self.set(RW, false);
         }
 
-        let cols: u8 = 16;
-
-        self.offsets[0] = 0x00;
-        self.offsets[1] = 0x40;
-        self.offsets[2] = 0x00 + cols;
-        self.offsets[3] = 0x40 + cols;
-
         match self.mode() {
             Mode::FourBits => {
                 // display function is four bit
@@ -551,6 +568,7 @@ where
         let max_lines = 4;
 
         let num_lines = match self.lines() {
+            Lines::FourLines => 4,
             Lines::TwoLines => 2,
             Lines::OneLine => 1,
         };
@@ -989,10 +1007,13 @@ where
     /// let lines = lcd.lines();
     /// ```
     pub fn lines(&self) -> Lines {
-        if (self.display_func & Lines::TwoLines as u8) == 0 {
-            Lines::OneLine
-        } else {
+        let flag_bits: u8 = self.display_func & 0x0C;
+        if flag_bits == Lines::FourLines as u8 {
+            Lines::FourLines
+        } else if flag_bits == Lines::TwoLines as u8 {
             Lines::TwoLines
+        } else {
+            Lines::OneLine
         }
     }
 
