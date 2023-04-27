@@ -131,6 +131,7 @@ const D4: u8 = 7;
 const D5: u8 = 8;
 const D6: u8 = 9;
 const D7: u8 = 10;
+const A: u8 = 11;
 
 /// The LCD display
 ///
@@ -141,9 +142,7 @@ where
     T: OutputPin<Error = Infallible> + Sized,
     D: DelayUs<u16> + Sized,
 {
-    #[cfg(feature = "i2c")]
-    backlight_pin: T,
-    pins: [Option<T>; 11],
+    pins: [Option<T>; 12],
     display_func: u8,
     display_mode: u8,
     display_ctrl: u8,
@@ -181,7 +180,7 @@ where
     ///     .with_rw(d10) // optional (set lcd pin to GND if not provided)
     ///     .build();
     /// ```
-    pub fn new(rs: T, en: T, delay: D, #[cfg(feature = "i2c")] backlight_pin: T) -> Self {
+    pub fn new(rs: T, en: T, delay: D) -> Self {
         Self {
             pins: [
                 Some(rs),
@@ -195,9 +194,8 @@ where
                 None,
                 None,
                 None,
+                None,
             ],
-            #[cfg(feature = "i2c")]
-            backlight_pin,
             display_func: DEFAULT_DISPLAY_FUNC,
             display_mode: DEFAULT_DISPLAY_MODE,
             display_ctrl: DEFAULT_DISPLAY_CTRL,
@@ -390,6 +388,12 @@ where
         self
     }
 
+    /// Set a pin for controlling backlight state
+    pub fn with_backlight(mut self, backlight_pin: T) -> Self {
+        self.pins[A as usize] = Some(backlight_pin);
+        self
+    }
+
     /// Set autoscroll on or off. (Default is AutoScroll::Off)
     ///
     /// # Examples
@@ -537,18 +541,6 @@ where
         // set an error code display is misconfigured
         self.validate();
         self
-    }
-
-    /// Turn backlight on
-    #[cfg(feature = "i2c")]
-    pub fn backlight_on(&mut self) {
-        let _ = self.backlight_pin.set_high();
-    }
-
-    /// Turn backlight off
-    #[cfg(feature = "i2c")]
-    pub fn backlight_off(&mut self) {
-        let _ = self.backlight_pin.set_low();
     }
 
     /// Set the position of the cursor.
@@ -874,6 +866,20 @@ where
     /// ```
     pub fn blink_off(&mut self) {
         self.set_blink(Blink::Off);
+    }
+
+    /// Turn backlight on
+    pub fn backlight_on(&mut self) {
+        if let Some(backlight_pin) = &mut self.pins[A as usize] {
+            let _ = backlight_pin.set_high();
+        }
+    }
+
+    /// Turn backlight off
+    pub fn backlight_off(&mut self) {
+        if let Some(backlight_pin) = &mut self.pins[A as usize] {
+            let _ = backlight_pin.set_low();
+        }
     }
 
     /// Turn autoscroll on. (See [set_autoscroll][LcdDisplay::set_autoscroll])
