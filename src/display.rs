@@ -1,5 +1,4 @@
 use crate::Error;
-use core::convert::Infallible;
 use embedded_hal::blocking::delay::DelayUs;
 use embedded_hal::digital::v2::OutputPin;
 
@@ -162,7 +161,7 @@ const A: u8 = 11;
 /// misconfigured.
 pub struct LcdDisplay<T, D>
 where
-    T: OutputPin<Error = Infallible> + Sized,
+    T: OutputPin + Sized,
     D: DelayUs<u16> + Sized,
 {
     pins: [Option<T>; 12],
@@ -176,7 +175,7 @@ where
 
 impl<T, D> LcdDisplay<T, D>
 where
-    T: OutputPin<Error = Infallible> + Sized,
+    T: OutputPin + Sized,
     D: DelayUs<u16> + Sized,
 {
     /// Create a new instance of the LcdDisplay
