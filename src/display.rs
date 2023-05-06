@@ -682,8 +682,8 @@ where
     /// Enable or disable LCD backlight
     pub fn set_backlight(&mut self, backlight: Backlight) {
         match backlight {
-            Backlight::On => self.blink_on(),
-            Backlight::Off => self.blink_off(),
+            Backlight::On => self.backlight_on(),
+            Backlight::Off => self.backlight_off(),
         }
     }
 
