@@ -73,6 +73,15 @@ pub enum Blink {
     Off = 0x00, // LCD_BLINKOFF
 }
 
+/// Flag that sets backlight state
+pub enum Backlight {
+    /// Turn Backlight on (default)
+    On,
+
+    /// Turn Backlight off
+    Off,
+}
+
 /// Flag used to indicate direction for display scrolling
 #[repr(u8)]
 pub enum Scroll {
@@ -145,6 +154,7 @@ const D4: u8 = 7;
 const D5: u8 = 8;
 const D6: u8 = 9;
 const D7: u8 = 10;
+const A: u8 = 11;
 
 /// The LCD display
 ///
@@ -155,7 +165,7 @@ where
     T: OutputPin<Error = Infallible> + Sized,
     D: DelayUs<u16> + Sized,
 {
-    pins: [Option<T>; 11],
+    pins: [Option<T>; 12],
     display_func: u8,
     display_mode: u8,
     display_ctrl: u8,
@@ -198,6 +208,7 @@ where
             pins: [
                 Some(rs),
                 Some(en),
+                None,
                 None,
                 None,
                 None,
@@ -407,6 +418,12 @@ where
             Blink::On => self.display_ctrl |= Blink::On as u8,
             Blink::Off => self.display_ctrl &= !(Blink::On as u8),
         }
+        self
+    }
+
+    /// Set a pin for controlling backlight state
+    pub fn with_backlight(mut self, backlight_pin: T) -> Self {
+        self.pins[A as usize] = Some(backlight_pin);
         self
     }
 
@@ -680,6 +697,14 @@ where
         self.delay.delay_us(CMD_DELAY);
     }
 
+    /// Enable or disable LCD backlight
+    pub fn set_backlight(&mut self, backlight: Backlight) {
+        match backlight {
+            Backlight::On => self.backlight_on(),
+            Backlight::Off => self.backlight_off(),
+        }
+    }
+
     /// Turn auto scroll on or off.
     ///
     /// # Examples
@@ -876,6 +901,20 @@ where
     /// ```
     pub fn blink_off(&mut self) {
         self.set_blink(Blink::Off);
+    }
+
+    /// Turn backlight on
+    pub fn backlight_on(&mut self) {
+        if let Some(backlight_pin) = &mut self.pins[A as usize] {
+            let _ = backlight_pin.set_high();
+        }
+    }
+
+    /// Turn backlight off
+    pub fn backlight_off(&mut self) {
+        if let Some(backlight_pin) = &mut self.pins[A as usize] {
+            let _ = backlight_pin.set_low();
+        }
     }
 
     /// Turn autoscroll on. (See [set_autoscroll][LcdDisplay::set_autoscroll])

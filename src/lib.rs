@@ -66,6 +66,8 @@
 
 mod display;
 mod errors;
+#[cfg(feature = "i2c")]
+pub mod i2c;
 
 pub use display::*;
 pub use errors::Error;
