@@ -43,7 +43,7 @@ where
     }
 }
 
-impl<'a, D, M, I2C> LcdDisplay<InfallibleOutputPin<Pin<'a, QuasiBidirectional, M>>, D>
+impl<'a, D, M, I2C> LcdDisplay<Pin<'a, QuasiBidirectional, M>, D>
 where
     D: DelayUs<u16> + Sized,
     M: BusMutex<Bus = pcf8574::Driver<I2C>>,
@@ -63,19 +63,10 @@ where
             p6,
             p7,
         } = parts;
-        LcdDisplay::new(
-            InfallibleOutputPin::new(p0),
-            InfallibleOutputPin::new(p2),
-            delay,
-        )
-        .with_backlight(InfallibleOutputPin::new(p3))
-        .with_rw(InfallibleOutputPin::new(p1))
-        .with_half_bus(
-            InfallibleOutputPin::new(p4),
-            InfallibleOutputPin::new(p5),
-            InfallibleOutputPin::new(p6),
-            InfallibleOutputPin::new(p7),
-        )
+        LcdDisplay::new(p0, p2, delay)
+            .with_backlight(p3)
+            .with_rw(p1)
+            .with_half_bus(p4, p5, p6, p7)
     }
 
     /// Creates a new [`LcdDisplay`] using PCF8572A for interfacing
