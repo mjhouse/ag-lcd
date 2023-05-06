@@ -1,47 +1,10 @@
 //! Allows interacting  with an lcd display via I2C using a digital port expander
 
 use crate::LcdDisplay;
-use core::{convert::Infallible, fmt::Debug};
-use embedded_hal::{blocking::delay::DelayUs, digital::v2::OutputPin};
+use core::fmt::Debug;
+use embedded_hal::blocking::delay::DelayUs;
 use port_expander::{dev::pcf8574, mode::QuasiBidirectional, I2cBus, Pcf8574, Pcf8574a, Pin};
 use shared_bus::BusMutex;
-
-/// Custom version of OldOutputPin that implements v2::OutputPin
-/// Used to convert pin with fallible error to infallible
-pub struct InfallibleOutputPin<T> {
-    pin: T,
-}
-
-impl<T, E> InfallibleOutputPin<T>
-where
-    T: OutputPin<Error = E>,
-    E: Debug,
-{
-    /// Wraps any OutputPin to make a struct implementing OutputPin<Error=Infallible>
-    fn new(pin: T) -> Self {
-        Self { pin }
-    }
-}
-
-impl<T, E> OutputPin for InfallibleOutputPin<T>
-where
-    T: OutputPin<Error = E>,
-    E: Debug,
-{
-    type Error = Infallible;
-
-    /// Set this output pin to low
-    fn set_low(&mut self) -> Result<(), Self::Error> {
-        let _ = self.pin.set_low();
-        Ok(())
-    }
-
-    /// Set this output pin to high
-    fn set_high(&mut self) -> Result<(), Self::Error> {
-        let _ = self.pin.set_high();
-        Ok(())
-    }
-}
 
 impl<'a, D, M, I2C> LcdDisplay<Pin<'a, QuasiBidirectional, M>, D>
 where
