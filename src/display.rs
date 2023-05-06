@@ -223,7 +223,7 @@ where
             display_mode: DEFAULT_DISPLAY_MODE,
             display_ctrl: DEFAULT_DISPLAY_CTRL,
             offsets: [0x00, 0x40, 0x00 + DEFAULT_COLS, 0x40 + DEFAULT_COLS],
-            delay: delay,
+            delay,
             code: Error::None,
         }
     }
@@ -275,6 +275,7 @@ where
     ///     .with_full_bus(d0, d1, d4, d5, d6, d7, d6, d7)
     ///     .build();
     /// ```
+    #[allow(clippy::too_many_arguments)]
     pub fn with_full_bus(mut self, d0: T, d1: T, d2: T, d3: T, d4: T, d5: T, d6: T, d7: T) -> Self {
         // set to eight-bit bus mode and assign pins
         self.display_func |= Mode::EightBits as u8;
@@ -1188,11 +1189,10 @@ where
     fn set(&mut self, index: u8, value: bool) {
         if self.pins[index as usize]
             .as_mut()
-            .map(|p| match value {
+            .and_then(|p| match value {
                 true => p.set_high().ok(),
                 false => p.set_low().ok(),
             })
-            .flatten()
             .is_none()
         {
             self.code = index.into();

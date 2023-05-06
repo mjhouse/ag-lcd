@@ -4,6 +4,7 @@
 #![deny(unused_variables)]
 #![deny(clippy::unwrap_used)]
 #![deny(clippy::expect_used)]
+#![allow(clippy::identity_op)]
 
 //! # AG-LCD
 //!
