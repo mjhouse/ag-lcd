@@ -20,3 +20,6 @@ shared-bus = "0.2"
 [features]
 avr-hal = []
 i2c = ["port-expander"]
+
+[package.metadata.docs.rs]
+features = ["i2c"]
