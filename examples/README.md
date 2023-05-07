@@ -1,6 +1,6 @@
 # AG-LCD Examples
 
-All examples assume: 
+## All non-I2C examples assume:
 
 * A HD44780 two-line LCD screen 
 * An Arduino Nano for examples in directory `nano/`, and an Arduino Uno for examples in directory `uno/`
@@ -27,6 +27,21 @@ Pins should be connected as follows (optional pins are commented in examples):
 | d3      | D6       | YES      |
 | d2      | D7       | YES      |
 
+## I2C examples assume:
+
+* A PCF8574 or a PCF8574A remote I/O expander
+* A HD44780 two-line LCD screen
+* An Arduino Nano for examples in directory `nano/`, and an Arduino Uno for examples in directory `uno/`
+
+Pins should be connected as follows:
+
+| Arduino | I/O Expander |
+|---------|--------------|
+| GND     | GND          |
+| VCC     | 5V           |
+| A4      | SDA          |
+| A5      | SCL          |
+
 # Running
 
 * You'll need [ravedude](https://crates.io/crates/ravedude) installed. You can do that by following their installation instructions for your system.
@@ -36,4 +51,4 @@ Pins should be connected as follows (optional pins are commented in examples):
 # Troubleshooting
 * If your using a Nano board and recieve `avrdude: stk500_getsync() attempt 1 of 10: not in sync: resp=0x00` upon running `cargo run`, it might be because your board was manufactured after January 2018. In that case you'll need the new boot loader, which is achieved by changing `nano` to `nano-new` for `runner` in `.cargo/config.toml` in the example directory.
 * Regarding Arduino Uno: only setups using required pins have been tested to work
-* Some users have reported issues with initializing the LCD: try using the builder method `with_reliable_init()`, and see `examples/uno/two_lines/` for an example that implements it (see [#4](https://github.com/mjhouse/ag-lcd/issues/4) for further discussion).
+* Some users have reported issues with initializing the LCD when not using I2C: try using the builder method `with_reliable_init()`, and see `examples/uno/two_lines/` for an example that implements it (see [#4](https://github.com/mjhouse/ag-lcd/issues/4) for further discussion).
