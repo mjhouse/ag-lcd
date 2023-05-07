@@ -37,6 +37,8 @@ where
     /// Refer to [Pcf8574a docs] from crate `port-expander` for more information about setup of the
     /// port expander
     ///
+    /// This method is only available if the `i2c` feature is enabled.
+    ///
     /// # Examples
     ///
     /// ```
@@ -66,6 +68,8 @@ where
     ///
     /// Refer to [Pcf8574a docs] from crate `port-expander` for more information about setup of the
     /// port expander
+    ///
+    /// This method is only available if the `i2c` feature is enabled.
     ///
     /// # Examples
     ///
