@@ -1,6 +1,6 @@
 # AG-LCD
 
-[![ag-lcd crate](https://img.shields.io/badge/crates.io-v0.1.1-orange)](https://crates.io/crates/ag-lcd)
+[![ag-lcd crate](https://img.shields.io/badge/crates.io-v0.2.0-green)](https://crates.io/crates/ag-lcd)
 [![ag-lcd docs](https://img.shields.io/badge/docs-ag--lcd-blue)](https://mjhouse.github.io/ag-lcd/ag_lcd/index.html)
 
 
