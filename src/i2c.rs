@@ -34,7 +34,10 @@ where
 
     /// Creates a new [`LcdDisplay`] using PCF8572A for interfacing
     ///
-    /// Refer to [Pcf8574a docs](https://docs.rs/port-expander/latest/port_expander/dev/pcf8574/struct.Pcf8574a.html) from crate `port-expander` for more information about setup of the port expander
+    /// Refer to [Pcf8574a docs] from crate `port-expander` for more information about setup of the
+    /// port expander
+    ///
+    /// This method is only available if the `i2c` feature is enabled.
     ///
     /// # Examples
     ///
@@ -54,6 +57,8 @@ where
     ///     .with_cursor(Cursor::Off)
     ///     .build();
     /// ```
+    ///
+    /// [Pcf8574a docs]: https://docs.rs/port-expander/latest/port_expander/dev/pcf8574/struct.Pcf8574a.html
     #[inline]
     pub fn new_pcf8574a(expander: &'a mut Pcf8574a<M>, delay: D) -> Self {
         Self::from_parts(expander.split(), delay)
@@ -61,7 +66,10 @@ where
 
     /// Creates a new [`LcdDisplay`] using PCF8572 for interfacing
     ///
-    /// Refer to [Pcf8574a docs](https://docs.rs/port-expander/latest/port_expander/dev/pcf8574/struct.Pcf8574.html) from crate `port-expander` for more information about setup of the port expander
+    /// Refer to [Pcf8574a docs] from crate `port-expander` for more information about setup of the
+    /// port expander
+    ///
+    /// This method is only available if the `i2c` feature is enabled.
     ///
     /// # Examples
     ///
@@ -81,6 +89,8 @@ where
     ///     .with_cursor(Cursor::Off)
     ///     .build();
     /// ```
+    ///
+    /// [Pcf8574a docs]: https://docs.rs/port-expander/latest/port_expander/dev/pcf8574/struct.Pcf8574a.html
     #[inline]
     pub fn new_pcf8574(expander: &'a mut Pcf8574<M>, delay: D) -> Self {
         Self::from_parts(expander.split(), delay)
