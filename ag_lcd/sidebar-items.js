@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["AutoScroll","Backlight","Blink","Cursor","Display","Error","Layout","Lines","Mode","Scroll","Size"],"struct":["LcdDisplay"]};
