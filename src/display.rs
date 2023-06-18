@@ -1252,10 +1252,10 @@ where
 #[cfg(feature = "ufmt")]
 impl<T, D> ufmt::uWrite for LcdDisplay<T, D>
 where
-    T: OutputPin<Error = Infallible> + Sized,
+    T: OutputPin<Error = core::convert::Infallible> + Sized,
     D: DelayUs<u16> + Sized,
 {
-    type Error = Infallible;
+    type Error = core::convert::Infallible;
 
     fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
         self.print(s);
