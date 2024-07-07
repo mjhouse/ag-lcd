@@ -1,6 +1,6 @@
 use crate::Error;
-use embedded_hal::blocking::delay::DelayUs;
-use embedded_hal::digital::v2::OutputPin;
+use embedded_hal::delay::DelayNs;
+use embedded_hal::digital::OutputPin;
 
 #[repr(u8)]
 #[allow(dead_code)]
@@ -139,8 +139,8 @@ const DEFAULT_DISPLAY_FUNC: u8 = Mode::FourBits as u8 | Lines::OneLine as u8 | S
 const DEFAULT_DISPLAY_CTRL: u8 = Display::On as u8 | Cursor::Off as u8 | Blink::Off as u8;
 const DEFAULT_DISPLAY_MODE: u8 = Layout::LeftToRight as u8 | AutoScroll::Off as u8;
 
-const CMD_DELAY: u16 = 3500;
-const CHR_DELAY: u16 = 450;
+const CMD_DELAY: u32 = 3500;
+const CHR_DELAY: u32 = 450;
 
 const RS: u8 = 0;
 const EN: u8 = 1;
@@ -162,7 +162,7 @@ const A: u8 = 11;
 pub struct LcdDisplay<T, D>
 where
     T: OutputPin + Sized,
-    D: DelayUs<u16> + Sized,
+    D: DelayNs + Sized,
 {
     pins: [Option<T>; 12],
     display_func: u8,
@@ -176,7 +176,7 @@ where
 impl<T, D> LcdDisplay<T, D>
 where
     T: OutputPin + Sized,
-    D: DelayUs<u16> + Sized,
+    D: DelayNs + Sized,
 {
     /// Create a new instance of the LcdDisplay
     ///
@@ -464,7 +464,7 @@ where
     ///     .with_reliable_init(10000)
     ///     .build();
     /// ```
-    pub fn with_reliable_init(mut self, delay_toggle: u16) -> Self {
+    pub fn with_reliable_init(mut self, delay_toggle: u32) -> Self {
         if self.display_ctrl == Display::On as u8 {
             for _ in 0..3 {
                 self.delay.delay_us(delay_toggle);
@@ -1253,7 +1253,7 @@ where
 impl<T, D> ufmt::uWrite for LcdDisplay<T, D>
 where
     T: OutputPin<Error = core::convert::Infallible> + Sized,
-    D: DelayUs<u16> + Sized,
+    D: DelayNs + Sized,
 {
     type Error = core::convert::Infallible;
 
