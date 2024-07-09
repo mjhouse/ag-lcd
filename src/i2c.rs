@@ -2,14 +2,13 @@
 
 use crate::LcdDisplay;
 use core::fmt::Debug;
-use embedded_hal::blocking::delay::DelayUs;
-use port_expander::{dev::pcf8574, mode::QuasiBidirectional, I2cBus, Pcf8574, Pcf8574a, Pin};
-use shared_bus::BusMutex;
+use embedded_hal::delay::DelayNs;
+use port_expander::{dev::pcf8574, mode::QuasiBidirectional, I2cBus, Pcf8574, Pcf8574a, Pin, PortMutex};
 
 impl<'a, D, M, I2C> LcdDisplay<Pin<'a, QuasiBidirectional, M>, D>
 where
-    D: DelayUs<u16> + Sized,
-    M: BusMutex<Bus = pcf8574::Driver<I2C>>,
+    D: DelayNs + Sized,
+    M: PortMutex<Port = pcf8574::Driver<I2C>>,
     I2C: I2cBus,
     <I2C as I2cBus>::BusError: Debug,
 {
