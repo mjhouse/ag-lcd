@@ -1,6 +1,6 @@
 [package]
 name = "ag-lcd"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Michael House <mjhouse@protonmail.com>"]
 keywords = [ "arduino", "avr-hal", "lcd", "HD44780", "LiquidCrystal", "i2c" ]
 categories = ["embedded","hardware-support"]
