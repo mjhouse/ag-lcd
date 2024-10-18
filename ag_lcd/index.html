@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="AG-LCD"><title>ag_lcd - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-c5d6553a23f1e5a6.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="ag_lcd" data-themes="" data-resource-suffix="" data-rustdoc-version="1.81.0 (eeb90cda1 2024-09-04)" data-channel="1.81.0" data-search-js="search-d234aafac6c221dd.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-d2fab2bf619172d3.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../ag_lcd/index.html">ag_lcd</a><span class="version">0.3.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li></ul></section></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <a class="mod" href="#">ag_lcd</a><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><span class="out-of-band"><a class="src" href="../src/ag_lcd/lib.rs.html#1-75">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="ag-lcd"><a class="doc-anchor" href="#ag-lcd">§</a>AG-LCD</h2>
+<p>This is a rust port of the <a href="https://github.com/arduino-libraries/LiquidCrystal">LiquidCrystal</a> library. LiquidCrystal
+is a standard C++ library that allows developers to control a <a href="https://pdf1.alldatasheet.com/datasheet-pdf/view/63673/HITACHI/HD44780/+435JWUEGSzDpKdlpzC.hv+/datasheet.pdf">HITACHI HD44780</a>
+LCD screen with one or two 16-character lines. Alternatives to this library (that I’ve investigated) are:</p>
+<ul>
+<li><a href="https://crates.io/crates/lcd">lcd</a></li>
+<li><a href="https://crates.io/crates/lcd1602-rs">lcd1602</a></li>
+</ul>
+<p>I decided to create a more comprehensive solution because existing libraries were either incomplete or somewhat
+complicated to use. This library uses traits from <a href="https://crates.io/crates/embedded-hal">embedded-hal</a> and should work
+with any hardware abstraction layer that uses the same types. Currently this crate has only been tested with <a href="https://github.com/Rahix/avr-hal">avr-hal</a>
+and all example code and comments assume you’re using avr-hal as well.</p>
+<p>Most features (blink, cursor, text direction etc.) can be set either through a general <code>set_</code> function that accepts
+one or two arguments (like <a href="struct.LcdDisplay.html#method.set_blink" title="method ag_lcd::LcdDisplay::set_blink">set_blink</a>), through specific conveniance functions (<a href="struct.LcdDisplay.html#method.blink_on" title="method ag_lcd::LcdDisplay::blink_on">blink_on</a> rather
+than <a href="struct.LcdDisplay.html#method.set_blink" title="method ag_lcd::LcdDisplay::set_blink">set_blink</a>) or with a builder function (like <a href="struct.LcdDisplay.html#method.with_blink" title="method ag_lcd::LcdDisplay::with_blink">with_blink</a>).</p>
+<p>If some functions are missing for a settings, its either because it doesn’t make sense for that particular setting, or
+because that feature can only be set <em>before</em> the <a href="struct.LcdDisplay.html#method.build" title="method ag_lcd::LcdDisplay::build">build</a> method is called (in which case only a <code>with_</code>
+function is provided).</p>
+<h3 id="usage"><a class="doc-anchor" href="#usage">§</a>Usage</h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>ag_lcd::{Display, Blink, Cursor, LcdDisplay};
+
+<span class="kw">let </span>peripherals = arduino_hal::Peripherals::take().unwrap();
+<span class="kw">let </span>pins = <span class="macro">arduino_hal::pins!</span>(peripherals);
+<span class="kw">let </span>delay = arduino_hal::Delay::new();
+
+<span class="kw">let </span>rs = pins.d12.into_output().downgrade();
+<span class="kw">let </span>rw = pins.d11.into_output().downgrade();
+<span class="kw">let </span>en = pins.d10.into_output().downgrade();
+<span class="comment">// let d0 = pins.d9.into_output().downgrade();
+// let d1 = pins.d8.into_output().downgrade();
+// let d2 = pins.d7.into_output().downgrade();
+// let d3 = pins.d6.into_output().downgrade();
+</span><span class="kw">let </span>d4 = pins.d5.into_output().downgrade();
+<span class="kw">let </span>d5 = pins.d4.into_output().downgrade();
+<span class="kw">let </span>d6 = pins.d3.into_output().downgrade();
+<span class="kw">let </span>d7 = pins.d2.into_output().downgrade();
+
+<span class="kw">let </span><span class="kw-2">mut </span>lcd: LcdDisplay&lt;<span class="kw">_</span>,<span class="kw">_</span>&gt; = LcdDisplay::new(rs, en, delay)
+    <span class="comment">// .with_full_bus(d0, d1, d2, d3, d4, d5, d6, d7)
+    </span>.with_half_bus(d4, d5, d6, d7)
+    .with_display(Display::On)
+    .with_blink(Blink::On)
+    .with_cursor(Cursor::On)
+    .with_rw(d10) <span class="comment">// optional (set to GND if not provided)
+    </span>.build();
+
+lcd.set_cursor(Cursor::Off);
+lcd.set_blink(Blink::Off);
+
+lcd.print(<span class="string">"Test message!"</span>);</code></pre></div>
+</div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="struct" href="struct.LcdDisplay.html" title="struct ag_lcd::LcdDisplay">LcdDisplay</a></div><div class="desc docblock-short">The LCD display</div></li></ul><h2 id="enums" class="section-header">Enums<a href="#enums" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="enum" href="enum.AutoScroll.html" title="enum ag_lcd::AutoScroll">AutoScroll</a></div><div class="desc docblock-short">Flag that sets the display to autoscroll</div></li><li><div class="item-name"><a class="enum" href="enum.Backlight.html" title="enum ag_lcd::Backlight">Backlight</a></div><div class="desc docblock-short">Flag that sets backlight state</div></li><li><div class="item-name"><a class="enum" href="enum.Blink.html" title="enum ag_lcd::Blink">Blink</a></div><div class="desc docblock-short">Flag that sets cursor background to blink</div></li><li><div class="item-name"><a class="enum" href="enum.Cursor.html" title="enum ag_lcd::Cursor">Cursor</a></div><div class="desc docblock-short">Flag that sets the cursor on/off</div></li><li><div class="item-name"><a class="enum" href="enum.Display.html" title="enum ag_lcd::Display">Display</a></div><div class="desc docblock-short">Flag that sets the display on/off</div></li><li><div class="item-name"><a class="enum" href="enum.Error.html" title="enum ag_lcd::Error">Error</a></div><div class="desc docblock-short">Error type for <a href="struct.LcdDisplay.html" title="struct ag_lcd::LcdDisplay">LcdDisplay</a>, returned by <a href="struct.LcdDisplay.html#method.error" title="method ag_lcd::LcdDisplay::error">LcdDisplay::error</a></div></li><li><div class="item-name"><a class="enum" href="enum.Layout.html" title="enum ag_lcd::Layout">Layout</a></div><div class="desc docblock-short">Flag that controls text direction</div></li><li><div class="item-name"><a class="enum" href="enum.Lines.html" title="enum ag_lcd::Lines">Lines</a></div><div class="desc docblock-short">Flag for the number of lines in the display</div></li><li><div class="item-name"><a class="enum" href="enum.Mode.html" title="enum ag_lcd::Mode">Mode</a></div><div class="desc docblock-short">Flag for the bus mode of the display</div></li><li><div class="item-name"><a class="enum" href="enum.Scroll.html" title="enum ag_lcd::Scroll">Scroll</a></div><div class="desc docblock-short">Flag used to indicate direction for display scrolling</div></li><li><div class="item-name"><a class="enum" href="enum.Size.html" title="enum ag_lcd::Size">Size</a></div><div class="desc docblock-short">Flag for the character size of the display</div></li></ul></section></div></main></body></html>

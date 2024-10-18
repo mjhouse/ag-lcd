@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"ag_lcd":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.81.0/core/convert/trait.From.html\" title=\"trait core::convert::From\">From</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.81.0/core/primitive.u8.html\">u8</a>&gt; for <a class=\"enum\" href=\"ag_lcd/enum.Error.html\" title=\"enum ag_lcd::Error\">Error</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
